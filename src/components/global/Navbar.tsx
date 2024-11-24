@@ -23,7 +23,7 @@ const Navbar: React.FC = () => {
   const screenType = useScreenType();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
-const router = useRouter();
+  const router = useRouter();
   const pathname = usePathname();
 
   const menuVariants = {
@@ -102,31 +102,34 @@ const router = useRouter();
           'fixed p-4 lg:px-8 z-10 duration-200'
         )}
       >
-        <div className="max-w-[1440px] mx-auto flex items-center justify-between h-full relative">
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between h-full relative ">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.5, delay: 0.2 }}
-            className="flex-shrink-0"
+            className="flex-shrink-0 "
           >
             <button
               className="flex items-center gap-x-3"
               onClick={() => handleNavigation('/')}
             >
-              <Image 
+              <Image
                 src={Logo}
                 alt="Logo"
                 width={isScrolled ? 24 : 32}
                 height={isScrolled ? 24 : 32}
                 className="transition-all duration-200"
               />
-              <span
-                className={`font-bold text-Text-A font-pop transition-all duration-200 ${
-                  isScrolled ? 'text-[12px]' : 'text-[16px]'
-                }`}
-              >
-                Inventory Management System
-              </span>
+              <div className="flex flex-col text-start">
+                <span
+                  className={`font-bold text-Text-A font-pop transition-all duration-200 ${
+                    isScrolled ? 'text-[12px]' : 'text-[16px]'
+                  }`}
+                >
+                  Inventory Management System
+                </span>
+                <p className="text-sm text-Text-A">Solution for your business</p>
+              </div>
             </button>
           </motion.div>
 
@@ -135,7 +138,7 @@ const router = useRouter();
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex-grow flex justify-center items-center"
+              className="flex-grow flex justify-center items-center gap-x-8"
             >
               {navbar_list.map((item: NavbarProps, index: number) => (
                 <button
@@ -164,16 +167,10 @@ const router = useRouter();
             {!screenType.isMobile ? (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative p-2"
-                  >
+                  <Button variant="ghost" size="icon" className="relative p-2">
                     <IoSettingsOutline
                       className={`text-Text-A transition-all duration-200 ${
-                        isScrolled
-                          ? 'w-[20px] h-[20px]'
-                          : 'w-[24px] h-[24px]'
+                        isScrolled ? 'w-[20px] h-[20px]' : 'w-[24px] h-[24px]'
                       }`}
                     />
                   </Button>
@@ -199,18 +196,14 @@ const router = useRouter();
                 >
                   {isMobileMenuOpen ? (
                     <HiX
-                      className={`text-primary-A transition-all duration-200 ${
-                        isScrolled
-                          ? 'w-[20px] h-[20px]'
-                          : 'w-[24px] h-[24px]'
+                      className={`text-Text-A transition-all duration-200 ${
+                        isScrolled ? 'w-[20px] h-[20px]' : 'w-[24px] h-[24px]'
                       }`}
                     />
                   ) : (
                     <RiMenu4Fill
-                      className={`text-primary-A transition-all duration-200 ${
-                        isScrolled
-                          ? 'w-[20px] h-[20px]'
-                          : 'w-[24px] h-[24px]'
+                      className={`text-Text-A transition-all duration-200 ${
+                        isScrolled ? 'w-[20px] h-[20px]' : 'w-[24px] h-[24px]'
                       }`}
                     />
                   )}
@@ -244,13 +237,13 @@ const router = useRouter();
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="absolute right-4 top-4"
                 >
-                  <HiX className="w-6 h-6 text-primary-A" />
+                  <HiX className="w-6 h-6 text-Text-A" />
                 </button>
 
                 {navbar_list.map((item: NavbarProps, index: number) => (
                   <motion.button
                     key={index}
-                    className="w-full py-3 text-left px-4 text-Text-A font-pop font-medium text-[16px]"
+                    className="w-full py-3 text-left px-4 text-Text-A font-pop font-medium gap-x-2 text-[16px]"
                     onClick={() => {
                       handleNavigation(item.path);
                       setIsMobileMenuOpen(false);
