@@ -18,22 +18,22 @@ interface InventoryTableProps {
 
 export function InventoryTable({ items }: InventoryTableProps) {
   return (
-    <div className="rounded-md border border-white/10 bg-white/5">
+    <div className="rounded-md border border-white/10 bg-white/5 overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-white">Items ID</TableHead>
-            <TableHead className="text-white">Items</TableHead>
-            <TableHead className="text-white">Category</TableHead>
-            <TableHead className="text-white">Status</TableHead>
-            <TableHead className="text-white">Location</TableHead>
-            <TableHead className="text-white">Action</TableHead>
+            <TableHead className="text-Text-A min-w-[100px]">Items ID</TableHead>
+            <TableHead className="text-Text-A min-w-[150px]">Items</TableHead>
+            <TableHead className="text-Text-A min-w-[120px]">Category</TableHead>
+            <TableHead className="text-Text-A min-w-[100px]">Status</TableHead>
+            <TableHead className="text-Text-A min-w-[120px]">Location</TableHead>
+            <TableHead className="text-Text-A min-w-[100px]">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {items.map((item) => (
             <TableRow key={item.id} className="border-white/5">
-              <TableCell className="font-medium text-white">{item.id}</TableCell>
+              <TableCell className="font-medium text-Text-A">{item.id}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Image
@@ -43,10 +43,10 @@ export function InventoryTable({ items }: InventoryTableProps) {
                     width={32}
                     height={32}
                   />
-                  <span className="text-white">{item.name}</span>
+                  <span className="text-Text-A">{item.name}</span>
                 </div>
               </TableCell>
-              <TableCell className="text-white">{item.category}</TableCell>
+              <TableCell className="text-Text-A">{item.category}</TableCell>
               <TableCell>
                 <span
                   className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
@@ -58,13 +58,13 @@ export function InventoryTable({ items }: InventoryTableProps) {
                   {item.status}
                 </span>
               </TableCell>
-              <TableCell className="text-white">{item.location}</TableCell>
+              <TableCell className="text-Text-A">{item.location}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-white">
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-Text-A">
                     <PencilIcon className="h-4 w-4" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-white">
+                  <Button size="icon" variant="ghost" className="h-8 w-8 text-Text-A">
                     <TrashIcon className="h-4 w-4" />
                   </Button>
                 </div>
@@ -76,4 +76,3 @@ export function InventoryTable({ items }: InventoryTableProps) {
     </div>
   )
 }
-
