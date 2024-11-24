@@ -14,11 +14,15 @@ const config: Config = {
   		},
   		colors: {
   			Text: {
-  				A: '#FFFFFF'
+  				A: '#FFFFFF',
+  				B: '#ABB7C2'
   			},
   			Background: {
   				A: '#162857'
   			},
+				Secondary: {
+					A: '#8F65BB'
+				},
   			background: 'hsl(var(--background))',
   			foreground: 'hsl(var(--foreground))',
   			card: {
