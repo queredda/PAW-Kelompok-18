@@ -3,16 +3,17 @@
 import React, {useState} from 'react'
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
+import Image from 'next/image';
 
-const page = () => {
-  const [selectedImage, setSelectedImage] = useState(null);
+const Page = () => {
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const handleImageChange = (event) => {
-    const file = event.target.files[0];
+  const handleImageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
     if (file) {
       const reader = new FileReader();
       reader.onload = () => {
-        setSelectedImage(reader.result); // Mengatur preview gambar
+        setSelectedImage(reader.result as string); // Mengatur preview gambar
       };
       reader.readAsDataURL(file);
     }
@@ -63,10 +64,11 @@ const page = () => {
           <div className="flex-col w-full max-w-[433px]">
             <div className="relative h-[402px] flex justify-center items-center bg-[#D9D9D9] rounded-3xl mb-3">
               {selectedImage ? (
-                <img
+                <Image
                   src={selectedImage}
                   alt="Preview"
-                  className="object-contain w-full h-full rounded-3xl"
+                  fill
+                  className="object-contain rounded-3xl"
                 />
               ) : (
                 <p className="text-[#CF67AF] text-[15px]">Anda belum memilih item apapun</p>
@@ -102,5 +104,4 @@ const page = () => {
   )
 }
 
-export default page
-
+export default Page
