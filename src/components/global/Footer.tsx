@@ -6,12 +6,12 @@ import logo from '/public/logo/Logo.svg';
 
 const Footer: React.FC = () => {
   return (
-    <footer className="bg-gradient-to-r from-[#EA68AA] via-[#8B5799] to-[#264491] text-Text-A font-mont px-4 py-12">
+    <footer className="bg-gradient-to-r from-[#EA68AA] via-[#8B5799] to-[#264491] text-Text-A font-mont px-14 py-12">
       <div className="container mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-start gap-8">
 
           {/* Logo and Description Section */}
-          <div className="max-w-md">
+          <div className="max-w-615px">
             <div className="flex items-center gap-2 mb-4">
               <div className="relative w-10 h-10">
                 <Image src={logo} alt="logo" fill sizes="fill" className="brightness-0 invert" draggable={false} />
@@ -21,17 +21,12 @@ const Footer: React.FC = () => {
                 <p className="text-sm">Solution for your business</p>
               </div>
             </div>
-            <p className="text-sm leading-relaxed ">
-              Platform ini adalah project dalam matakuliah Pengembangan Aplikasi Web
-              di Departemen Teknik Elektro dan Teknologi Informasi,
-              Fakultas Teknik,
-              Universitas Gadjah Mada.
-              Tim Pengembang terdiri dari
-              Muhamad Farrel Adrian (22/505897/TK/55394),
-              Mahsa Quereda Bahjah (22/503299/TK/54984),
-              Nashatra Aqila Ramadhani (22/504580/TK/55195),
-              Raden Aryo Bismo Nugroho (22/494473/TK/54233),
-              dan Septian Eka Rahmadi (22/496732/TK/54442)
+            <p className="text-sm leading-relaxed">
+              Platform ini adalah project dalam matakuliah Pengembangan Aplikasi Web di 
+              <br /> Departemen Teknik Elektro dan Teknologi Informasi, Fakultas Teknik, Universitas Gadjah Mada.
+              <br /> Tim Pengembang terdiri dari Muhamad Farrel Adrian (22/505897/TK/55394), Mahsa Quereda Bahjah 
+              <br /> (22/503299/TK/54984), Nashatra Aqila Ramadhani (22/504580/TK/55195), Raden Aryo Bismo Nugroho 
+              <br /> (22/494473/TK/54233), dan Septian Eka Rahmadi (22/496732/TK/54442)
             </p>
           </div>
 
@@ -51,7 +46,7 @@ const Footer: React.FC = () => {
 
             {/* Email Subscription */}
             <div className="w-full md:max-w-md">
-              <h3 className="text-xl font-semibold mb-4">Tetap terhubung dengan kami, melalui email anda</h3>
+              <h3 className="text-lg font-semibold mb-4">Tetap terhubung dengan kami, melalui email anda</h3>
               <div className="flex">
                 <input
                   type="email"
