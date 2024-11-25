@@ -3,7 +3,6 @@ import Logo from '/public/logo/Logo.svg';
 import Image from 'next/image';
 
 const About = () => {
-  // team member's data
   const teamMembers = [
     {
       name: 'Mahsa Quereda Bahjah',
