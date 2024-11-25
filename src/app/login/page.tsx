@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
+import { signIn } from "next-auth/react";
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter();
@@ -53,6 +54,7 @@ const LoginPage = (): JSX.Element => {
                 {/* Google Login */}
                 <button
                   type="button"
+                  onClick={() => signIn("google")}
                   className="flex-1 py-2 bg-[#D9D9D9] text-gray-700 rounded-[30px] font-semibold shadow hover:bg-gray-100 transition flex items-center justify-center">
                   <FcGoogle className="inline h-5 w-5 mr-2" />
                   Log In with Google
