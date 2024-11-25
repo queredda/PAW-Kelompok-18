@@ -6,8 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Checkbox } from "@/components/ui/checkbox"
 import { FcGoogle } from "react-icons/fc"
-import Navbar from "@/components/global/Navbar"
-import Footer from "@/components/global/Footer"
 
 export default function AdminForm() {
   const [formData, setFormData] = useState({

@@ -99,10 +99,12 @@ const About = () => {
                   </div>
 
                   {/* Foto Anggota */}
-                  <img
+                  <Image
                     className="absolute w-[120px] h-[120px] top-0 center left-[65px] object-cover rounded-full"
                     alt={member.name}
                     src={member.img}
+                    width={120}
+                    height={120}
                   />
                 </div>
               </div>

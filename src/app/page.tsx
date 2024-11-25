@@ -6,7 +6,7 @@ import { SlHandbag } from "react-icons/sl";
 import { FiFileText } from "react-icons/fi";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
-
+import Image from "next/image";
 
 const Home: React.FC = () => {
   const router = useRouter();
@@ -41,8 +41,14 @@ const Home: React.FC = () => {
         </div>
         <div className="w-full max-w-sm lg:w-1/2">
           <div className="relative aspect-square lg:pt-8">
-            <img
-                src="logo/Logo.png" alt="rectangle" width="255" height="290" className="w-full h-auto m-0 block max-w-[255px]"/>
+            <Image
+                src="/logo/Logo.png"
+                alt="rectangle"
+                width={255}
+                height={290}
+                className="w-full h-auto m-0 block max-w-[255px]"
+                priority
+            />
           </div>
         </div>  
       </div>
