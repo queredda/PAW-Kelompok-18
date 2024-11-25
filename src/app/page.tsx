@@ -1,11 +1,9 @@
 "use client";
 
 import React from "react";
-import Navbar from "@/components/global/Navbar";
 import { TbFolderSearch } from "react-icons/tb";
 import { SlHandbag } from "react-icons/sl";
 import { FiFileText } from "react-icons/fi";
-import Footer from "@/components/global/Footer";
 import { Button } from "@/components/ui/button";
 import { useRouter } from "next/navigation";
 
@@ -30,12 +28,12 @@ const Home: React.FC = () => {
               dirancang untuk memenuhi kebutuhan setiap pengguna.</p>
           <div className="flex flex-col gap-4 sm:flex-row">
               <Button 
-                onClick={() => router.push("landing/register/type-selection")}
+                onClick={() => router.push("/register")}
                 className="rounded-[20px] bg-[#EA68AA] px-12 py-3 font-poppins text-[18px] font-semibold text-white transition-opacity hover:opacity-90">
                 Mendaftar
               </Button>
               <Button 
-                onClick={() => router.push("landing/login")}
+                onClick={() => router.push("/login")}
                 className="rounded-[20px] bg-[#8F65BB] px-12 py-3 font-poppins text-[18px] font-semibold text-white transition-opacity hover:opacity-90">
                 Masuk
               </Button>
