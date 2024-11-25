@@ -1,11 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import Navbar from "@/components/global/Navbar";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
-import Footer from "@/components/global/Footer";
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter();
@@ -66,7 +64,7 @@ const LoginPage = (): JSX.Element => {
             <p className="mt-4 text-sm text-white">
               Belum punya akun?{" "}
               <button
-                onClick={() => router.push("/landing/register/type-selection")}
+                onClick={() => router.push("/register")}
                 className="text-pink-300 underline hover:text-[#413d79]">
                 Daftar dulu yuk
               </button>
