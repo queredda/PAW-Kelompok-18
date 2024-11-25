@@ -17,7 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import Logo from '/public/logo/Logo.svg';
+import Logo from '/public/logo/LogoWhite.svg';
 
 const Navbar: React.FC = () => {
   const screenType = useScreenType();
