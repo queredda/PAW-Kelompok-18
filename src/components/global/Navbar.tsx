@@ -8,9 +8,11 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RiMenu4Fill } from 'react-icons/ri';
 import { HiX } from 'react-icons/hi';
 import { IoSettingsOutline } from 'react-icons/io5';
-import { navbar_list, NavbarProps } from '@/metadata/navbar_list';
+import { publicNavItems, protectedNavItems, NavbarProps } from '@/metadata/navbar_list';
 import { Button } from '../ui/button';
 import Image from 'next/image';
+import { useSession, signOut, getSession } from "next-auth/react";
+import axios from 'axios';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,6 +22,10 @@ import {
 import Logo from '/public/logo/LogoWhite.svg';
 
 const Navbar: React.FC = () => {
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const navItems = isAuthenticated ? protectedNavItems : publicNavItems;
+
   const screenType = useScreenType();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
@@ -88,6 +94,30 @@ const Navbar: React.FC = () => {
     router.push(path);
   };
 
+  const handleLogout = async () => {
+    try {
+      const session = await getSession();
+      await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout`, {
+        withCredentials: true,
+        headers: {
+          'Authorization': `Bearer ${session?.accessToken}`,
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      await signOut({ redirect: true, callbackUrl: '/' });
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (session?.accessToken) {
+      console.log('Navbar - JWT Token:', session.accessToken);
+    }
+  }, [session]);
+
   return (
     <>
       <motion.div
@@ -140,7 +170,7 @@ const Navbar: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="flex-grow flex justify-center items-center gap-x-8"
             >
-              {navbar_list.map((item: NavbarProps, index: number) => (
+              {navItems.map((item: NavbarProps, index: number) => (
                 <button
                   key={index}
                   className={twMerge(
@@ -176,9 +206,15 @@ const Navbar: React.FC = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="font-pop">
-                  <DropdownMenuItem onClick={() => handleNavigation('/login')}>
-                    Login
-                  </DropdownMenuItem>
+                  {isAuthenticated ? (
+                    <DropdownMenuItem onClick={handleLogout}>
+                      Logout
+                    </DropdownMenuItem>
+                  ) : (
+                    <DropdownMenuItem onClick={() => handleNavigation('/login')}>
+                      Login
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -240,7 +276,7 @@ const Navbar: React.FC = () => {
                   <HiX className="w-6 h-6 text-Text-A" />
                 </button>
 
-                {navbar_list.map((item: NavbarProps, index: number) => (
+                {navItems.map((item: NavbarProps, index: number) => (
                   <motion.button
                     key={index}
                     className="w-full py-3 text-left px-4 text-Text-A font-pop font-medium gap-x-2 text-[16px]"
@@ -253,15 +289,27 @@ const Navbar: React.FC = () => {
                   </motion.button>
                 ))}
 
-                <motion.button
-                  className="w-full py-3 text-left px-4 text-Text-A font-pop font-medium text-[16px]"
-                  onClick={() => {
-                    handleNavigation('/logout');
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Logout
-                </motion.button>
+                {isAuthenticated ? (
+                  <motion.button
+                    className="w-full py-3 text-left px-4 text-Text-A font-pop font-medium text-[16px]"
+                    onClick={() => {
+                      handleLogout();
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    Logout
+                  </motion.button>
+                ) : (
+                  <motion.button
+                    className="w-full py-3 text-left px-4 text-Text-A font-pop font-medium text-[16px]"
+                    onClick={() => {
+                      handleNavigation('/login');
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    Login
+                  </motion.button>
+                )}
               </div>
             </motion.div>
           </>
