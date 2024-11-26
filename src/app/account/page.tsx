@@ -37,6 +37,10 @@ export default function AccountPage() {
     return <div>Loading...</div>;
   }
 
+  if (!session?.user?.name || !session?.user?.email) {
+    return <div>Missing user information</div>;
+  }
+
   return (
     <div className="w-full min-h-screen bg-Background-A px-8 sm:px-6 md:px-8 lg:px-12 py-6 sm:py-8 md:py-10">
       <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold text-center text-Text-A mb-8 sm:mb-10">

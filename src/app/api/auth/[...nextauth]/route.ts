@@ -1,10 +1,10 @@
-import NextAuth from "next-auth";
+import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
 
-const authOptions = {
+const authOptions: AuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Credentials",
@@ -20,15 +20,15 @@ const authOptions = {
           const response = await axios.post(
             `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
             {
-              email: credentials?.email,
-              password: credentials?.password,
+              email: credentials.email,
+              password: credentials.password,
             }
           );
 
           if (response.data) {
             return {
               id: response.data.id,
-              email: credentials?.email,
+              email: credentials.email,
               name: response.data.name,
               image: response.data.profilePic,
               accessToken: response.data.token,
@@ -47,8 +47,8 @@ const authOptions = {
     error: '/error',
   },
   callbacks: {
-    async jwt({ token, user }: { token: JWT, user: { accessToken: string } }) {
-      if (user) {
+    async jwt({ token, user,  }) {
+      if (user && 'accessToken' in user) {
         token.accessToken = user.accessToken;
       }
       return token;
