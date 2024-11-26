@@ -20,7 +20,7 @@ export default function AccountPage() {
       if (session?.accessToken) {
         console.log('Access token found:', session.accessToken);
         try {
-          const data = await fetchProfile(session.accessToken);
+          const data = await fetchProfile(); // Removed session.accessToken argument
           console.log('Profile data in component:', data);
         } catch (error) {
           console.error('Failed to fetch profile in component:', error);

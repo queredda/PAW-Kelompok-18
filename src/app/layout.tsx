@@ -4,7 +4,6 @@ import './globals.css';
 import React from 'react';
 import { poppins } from '@/app/font';
 import dynamic from 'next/dynamic';
-import { Toaster } from '@/components/ui/toaster';
 import Providers from "../components/providers";
 
 const Navbar = dynamic(() => import('@/components/global/Navbar'), {
@@ -24,7 +23,6 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
       <body className={`${poppins.variable}`}>
         <Providers>
           <Navbar />
-          <Toaster />
           <main className={`py-[150px] md:px-[120px] bg-Background-A overflow-hidden`}>
             {children}
           </main>

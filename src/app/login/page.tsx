@@ -24,7 +24,10 @@ const LoginPage = (): JSX.Element => {
         password
       });
 
-      console.log('API Response:', response.data);
+      if (response.data.token) {
+        localStorage.setItem('token', response.data.token);
+        document.cookie = `token=${response.data.token}; path=/; max-age=86400; secure; samesite=strict`;
+      }
 
       router.push("/");
       router.refresh();
