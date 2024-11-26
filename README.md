@@ -9,9 +9,10 @@ Mengelola Inventaris Lebih Mudah, Efisien, dan Akurat dengan website BOX: Invent
 - **Septian Eka Rahmadi** (22/496732/TK/54442) as UI/UX Designer
 
 ## 🎥 Additional Link:
-- **[UI/UX Design - Figma Project] (https://www.figma.com/design/3NqihbD5xevgfBMOysujjm/Design-Project-for-PAW-'22-(Kelompok-18)?node-id=141-161&t=ZmS1KWjpDizir9xd-1)**
-- **[Presentation Slide] (https://www.canva.com/design/DAGXim_fyEY/Fy4oXQnGOJE3ephB4BNBmQ/edit?utm_content=DAGXim_fyEY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)**
-- **[Presentation Video] (https://www.youtube.com/)**
+- **[UI/UX Design - Figma Project](https://www.figma.com/design/3NqihbD5xevgfBMOysujjm/Design-Project-for-PAW-'22-(Kelompok-18)?node-id=141-161&t=ZmS1KWjpDizir9xd-1)**
+- **[Presentation Slide](https://www.canva.com/design/DAGXim_fyEY/Fy4oXQnGOJE3ephB4BNBmQ/edit?utm_content=DAGXim_fyEY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)**
+- **[Presentation Video](https://www.youtube.com/)**
+
 
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
