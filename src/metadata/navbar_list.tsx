@@ -1,6 +1,19 @@
 import { NavbarProps } from '@/types/inventory';
 
-export const navbar_list: NavbarProps[] = [
+// Public routes (when not logged in)
+export const publicNavItems: NavbarProps[] = [
+  {
+    menu: 'Dashboard',
+    path: '/',
+  },
+  {
+    menu: 'About',
+    path: '/about',
+  },
+];
+
+// Protected routes (when logged in)
+export const protectedNavItems: NavbarProps[] = [
   {
     menu: 'Dashboard',
     path: '/',
