@@ -31,31 +31,45 @@ export default function AccountPage() {
             </Button>
           </div>
           <div className="space-y-2 sm:space-y-3 w-full text-xs sm:text-base">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-              <strong className="min-w-[100px] sm:min-w-[180px]">Nama:</strong>
-              <span className="break-words">Anjas Maraditha</span>
+            <div className=" flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 bg-white/5 p-2 rounded-md">
+              <strong className="md:min-w-[100px] min-w-[180px] text-Text-A text-[12px] md:text-[16px]">
+                Nama:
+              </strong>
+              <p className="text-Text-A text-[12px] md:text-[16px]">
+                Anjas Maraditha
+              </p>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-              <strong className="min-w-[100px] sm:min-w-[180px]">Email:</strong>
-              <span className="break-words">anjasmaraditha@gmail.com</span>
+            <div className=" flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 bg-white/5 p-2 rounded-md">
+              <strong className="md:min-w-[100px] min-w-[180px] text-Text-A text-[12px] md:text-[16px]">
+                Email:
+              </strong>
+              <p className="text-Text-A text-[12px] md:text-[16px]">
+                anjasmaraditha@gmail.com
+              </p>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-              <strong className="min-w-[100px] sm:min-w-[180px]">
+            <div className="flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 bg-white/5 p-2 rounded-md">
+              <strong className="md:min-w-[100px] min-w-[180px] text-Text-A text-[12px] md:text-[16px]">
                 Nama Perusahaan:
               </strong>
-              <span className="break-words">PT. Malayang Ke Timur, Tbk</span>
+              <p className="text-Text-A text-[12px] md:text-[16px]">
+                PT. Malayang Ke Timur, Tbk
+              </p>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-              <strong className="min-w-[100px] sm:min-w-[180px]">
+            <div className="flex-col sm:flex-row sm:items-center gap-1 sm:gap-4 bg-white/5 p-2 rounded-md">
+              <strong className="md:min-w-[100px] min-w-[180px] text-Text-A text-[12px] md:text-[16px]">
                 Tipe Akun:
               </strong>
-              <span className="break-words">Admin Perusahaan</span>
+              <p className="text-Text-A text-[12px] md:text-[16px]">
+                Admin Perusahaan
+              </p>
             </div>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-4">
-              <strong className="min-w-[100px] sm:min-w-[180px]">
+            <div className=" flex-col sm:flex-row sm:items-center md:gap-2 sm:gap-4 bg-white/5 p-2 rounded-md">
+              <strong className="md:min-w-[100px] min-w-[180px] text-Text-A text-[12px] md:text-[16px]">
                 Kode Unik Perusahaan:
               </strong>
-              <span className="break-words">53p+14n_3k4</span>
+              <p className="text-Text-A text-[12px] md:text-[16px]">
+                53p+14n_3k4
+              </p>
             </div>
           </div>
         </CardContent>
