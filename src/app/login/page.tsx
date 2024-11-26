@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import axios from "axios";
+import { jwtDecode } from "jwt-decode";
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter();
@@ -20,18 +21,12 @@ const LoginPage = (): JSX.Element => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const response = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/profile`, {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            },
-            withCredentials: true
-          });
-
+          const decoded = jwtDecode<{ role: string; email: string }>(token);
           setIsLoggedIn(true);
           
-          if (response.data.role === 'user') {
+          if (decoded.role === 'user') {
             router.push('/employee/');
-          } else if (response.data.role === 'admin') {
+          } else if (decoded.role === 'admin') {
             router.push('/admin/');
           }
         } catch (error) {
@@ -73,20 +68,16 @@ const LoginPage = (): JSX.Element => {
       });
 
       if (response.data.token) {
-        localStorage.setItem('token', response.data.token);
-        document.cookie = `token=${response.data.token}; path=/; max-age=86400; secure; samesite=strict`;
+        const token = response.data.token;
+        const decoded = jwtDecode<{ role: string; email: string }>(token);
         
-        const profileResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/profile`, {
-          headers: {
-            'Authorization': `Bearer ${response.data.token}`
-          },
-          withCredentials: true
-        });
+        localStorage.setItem('token', token);
+        document.cookie = `token=${token}; path=/; max-age=86400; secure; samesite=strict`;
 
-        if (profileResponse.data.role === 'user') {
+        if (decoded.role === 'user') {
           router.push('/employee/');
-        } else if (profileResponse.data.role === 'admin') {
-          router.push('/navigation/');
+        } else if (decoded.role === 'admin') {
+          router.push('/admin/');
         }
       }
       
