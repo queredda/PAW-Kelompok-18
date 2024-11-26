@@ -5,7 +5,7 @@ import React from 'react';
 import { poppins } from '@/app/font';
 import dynamic from 'next/dynamic';
 import { Toaster } from '@/components/ui/toaster';
-import { Providers } from "./providers";
+import Providers from "../components/providers";
 
 const Navbar = dynamic(() => import('@/components/global/Navbar'), {
   ssr: false,
