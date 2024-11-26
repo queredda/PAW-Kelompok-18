@@ -11,8 +11,7 @@ import { IoSettingsOutline } from 'react-icons/io5';
 import { publicNavItems, protectedNavItems, NavbarProps } from '@/metadata/navbar_list';
 import { Button } from '../ui/button';
 import Image from 'next/image';
-import { useSession, signOut, getSession } from "next-auth/react";
-import axios from 'axios';
+import { useSession, signIn, signOut } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -93,30 +92,6 @@ const Navbar: React.FC = () => {
   const handleNavigation = (path: string): void => {
     router.push(path);
   };
-
-  const handleLogout = async () => {
-    try {
-      const session = await getSession();
-      await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout`, {
-        withCredentials: true,
-        headers: {
-          'Authorization': `Bearer ${session?.accessToken}`,
-          'Accept': 'application/json',
-          'Content-Type': 'application/json',
-        }
-      });
-      
-      await signOut({ redirect: true, callbackUrl: '/' });
-    } catch (error) {
-      console.error('Logout failed:', error);
-    }
-  };
-
-  useEffect(() => {
-    if (session?.accessToken) {
-      console.log('Navbar - JWT Token:', session.accessToken);
-    }
-  }, [session]);
 
   return (
     <>
@@ -206,13 +181,18 @@ const Navbar: React.FC = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="font-pop">
-                  {isAuthenticated ? (
-                    <DropdownMenuItem onClick={handleLogout}>
-                      Logout
-                    </DropdownMenuItem>
+                  {session && session.user ? (
+                    <>
+                      <DropdownMenuItem className="text-sky-600">
+                        {session.user.name}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => signOut()} className="text-red-600">
+                        Sign Out
+                      </DropdownMenuItem>
+                    </>
                   ) : (
-                    <DropdownMenuItem onClick={() => handleNavigation('/login')}>
-                      Login
+                    <DropdownMenuItem onClick={() => signIn()} className="text-green-600">
+                      Sign In
                     </DropdownMenuItem>
                   )}
                 </DropdownMenuContent>
@@ -289,25 +269,30 @@ const Navbar: React.FC = () => {
                   </motion.button>
                 ))}
 
-                {isAuthenticated ? (
-                  <motion.button
-                    className="w-full py-3 text-left px-4 text-Text-A font-pop font-medium text-[16px]"
-                    onClick={() => {
-                      handleLogout();
-                      setIsMobileMenuOpen(false);
-                    }}
-                  >
-                    Logout
-                  </motion.button>
+                {session && session.user ? (
+                  <>
+                    <motion.div className="w-full py-3 text-left px-4 text-sky-600 font-pop font-medium text-[16px]">
+                      {session.user.name}
+                    </motion.div>
+                    <motion.button
+                      className="w-full py-3 text-left px-4 text-red-600 font-pop font-medium text-[16px]"
+                      onClick={() => {
+                        signOut();
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      Sign Out
+                    </motion.button>
+                  </>
                 ) : (
                   <motion.button
-                    className="w-full py-3 text-left px-4 text-Text-A font-pop font-medium text-[16px]"
+                    className="w-full py-3 text-left px-4 text-green-600 font-pop font-medium text-[16px]"
                     onClick={() => {
-                      handleNavigation('/login');
+                      signIn();
                       setIsMobileMenuOpen(false);
                     }}
                   >
-                    Login
+                    Sign In
                   </motion.button>
                 )}
               </div>
