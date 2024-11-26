@@ -47,7 +47,7 @@ const authOptions: AuthOptions = {
     error: '/error',
   },
   callbacks: {
-    async jwt({ token, user,  }) {
+    async jwt({ token, user }) {
       if (user && 'accessToken' in user) {
         token.accessToken = user.accessToken;
       }
