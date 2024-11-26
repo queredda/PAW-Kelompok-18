@@ -2,12 +2,11 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
-import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
-import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import axios from "axios";
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter();
@@ -15,17 +14,21 @@ const LoginPage = (): JSX.Element => {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-  };
-
-  const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      await signIn("google", {
-        callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/`,
-        redirect: true
+      
+      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
+        email,
+        password
       });
+
+      console.log('API Response:', response.data);
+
+      router.push("/");
+      router.refresh();
+      
     } catch (err) {
       console.error('Login error:', err);
     } finally {
@@ -78,20 +81,10 @@ const LoginPage = (): JSX.Element => {
                 <div className="flex flex-col sm:flex-row gap-4">
                   <Button
                     type="submit"
-                    className="w-full sm:w-1/3 bg-[#413D79] text-white hover:bg-[#4C51BF] rounded-full border-0"
-                  >
-                    Login
-                  </Button>
-
-                  <Button
-                    type="button"
-                    onClick={handleGoogleSignIn}
-                    variant="secondary"
-                    className="w-full sm:flex-1 bg-[#D9D9D9] text-gray-700 hover:bg-gray-100 rounded-full border-0 text-Text-D font-pop"
+                    className="w-full bg-[#413D79] text-white hover:bg-[#4C51BF] rounded-full border-0"
                     disabled={isLoading}
                   >
-                    <FcGoogle className="mr-1 h-8 w-8" />
-                    {isLoading ? "Signing in..." : "Sign In with Google"}
+                    {isLoading ? "Loading..." : "Login"}
                   </Button>
                 </div>
               </form>

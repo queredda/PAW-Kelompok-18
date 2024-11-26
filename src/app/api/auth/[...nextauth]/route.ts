@@ -1,15 +1,45 @@
 import NextAuth from "next-auth";
-import GoogleProvider from "next-auth/providers/google";
+import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
-import { Account, Profile } from "next-auth";
 
 const authOptions = {
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID ?? "",
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
+    CredentialsProvider({
+      name: "Credentials",
+      credentials: {
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) {
+          return null;
+        }
+        try {
+          const response = await axios.post(
+            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
+            {
+              email: credentials?.email,
+              password: credentials?.password,
+            }
+          );
+
+          if (response.data) {
+            return {
+              id: response.data.id,
+              email: credentials?.email,
+              name: response.data.name,
+              image: response.data.profilePic,
+              accessToken: response.data.token,
+            };
+          }
+          return null;
+        } catch (error) {
+          console.error('Login error:', error);
+          return null;
+        }
+      }
     }),
   ],
   pages: {
@@ -17,21 +47,9 @@ const authOptions = {
     error: '/error',
   },
   callbacks: {
-    async jwt({ token, account, profile }: { token: JWT, account: Account | null, profile?: Profile }) {
-      if (account) {
-        try {
-          const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/google`,
-            {
-              token: account.access_token,
-              email: profile?.email,
-              name: profile?.name,
-            }
-          );
-          token.accessToken = response.data.token;
-        } catch (error) {
-          console.error('Error exchanging token:', error);
-        }
+    async jwt({ token, user }: { token: JWT, user: { accessToken: string } }) {
+      if (user) {
+        token.accessToken = user.accessToken;
       }
       return token;
     },
@@ -41,14 +59,8 @@ const authOptions = {
       }
       return session;
     },
-    async redirect({ url, baseUrl }: { url: string, baseUrl: string }) {
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      else if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
-    },
   },
 };
 
-// Export handler using Next.js Route API
 export const GET = NextAuth(authOptions);
 export const POST = NextAuth(authOptions);
