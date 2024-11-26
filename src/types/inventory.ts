@@ -17,7 +17,6 @@
   customer: string
   date: string
   amount: number
-  paymentMode: string
   status: string
 }
 
