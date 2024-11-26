@@ -1,3 +1,19 @@
+# 📦 Apakah barang-barang di perusahaan Anda sering hilang atau tidak terpantau dengan baik?
+Mengelola Inventaris Lebih Mudah, Efisien, dan Akurat dengan website BOX: Inventory Management System. 
+
+## 📚 Team Member
+- **Mahsa Quereda Bahjah** (22/503299/TK/54984) as Full-Stack Engineer
+- **Muhammad Farrel Adrian** (22/505897/TK/55394) as Back-End Engineer 
+- **Nashatra Aqila Ramadhani** (22/504580/TK/55195) as Front-End Engineer
+- **Raden Aryo Bismo Nugroho** (22/494473/TK/54233) as Front-End Engineer
+- **Septian Eka Rahmadi** (22/496732/TK/54442) as UI/UX Designer
+
+## 🎥 Additional Link:
+- **[UI/UX Design - Figma Project] (https://www.figma.com/design/3NqihbD5xevgfBMOysujjm/Design-Project-for-PAW-'22-(Kelompok-18)?node-id=141-161&t=ZmS1KWjpDizir9xd-1)**
+- **[Presentation Slide] (https://www.canva.com/design/DAGXim_fyEY/Fy4oXQnGOJE3ephB4BNBmQ/edit?utm_content=DAGXim_fyEY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)**
+- **[Presentation Video] (https://www.youtube.com/)**
+
+
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
 ## Getting Started
