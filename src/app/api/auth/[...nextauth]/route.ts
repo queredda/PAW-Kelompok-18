@@ -1,10 +1,11 @@
-import NextAuth from "next-auth/next";
+import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import axios from "axios";
 import { JWT } from "next-auth/jwt";
 import { Session } from "next-auth";
+import { Account, Profile } from "next-auth";
 
-const handler = NextAuth({
+const authOptions = {
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID ?? "",
@@ -13,10 +14,10 @@ const handler = NextAuth({
   ],
   pages: {
     signIn: '/login',
-    error: '/error', // Create this page if you haven't already
+    error: '/error',
   },
   callbacks: {
-    async jwt({ token, account, profile }) {
+    async jwt({ token, account, profile }: { token: JWT, account: Account | null, profile?: Profile }) {
       if (account) {
         try {
           const response = await axios.post(
@@ -40,14 +41,14 @@ const handler = NextAuth({
       }
       return session;
     },
-    async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url
-      return baseUrl
+    async redirect({ url, baseUrl }: { url: string, baseUrl: string }) {
+      if (url.startsWith("/")) return `${baseUrl}${url}`;
+      else if (new URL(url).origin === baseUrl) return url;
+      return baseUrl;
     },
   },
-});
+};
 
-export { handler as GET, handler as POST };
+// Export handler using Next.js Route API
+export const GET = NextAuth(authOptions);
+export const POST = NextAuth(authOptions);
