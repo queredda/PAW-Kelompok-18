@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import axios from "axios";
-import { jwtDecode } from "jwt-decode";
+import jwtDecode from "jwt-decode";
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter();
@@ -22,6 +22,7 @@ const LoginPage = (): JSX.Element => {
       if (token) {
         try {
           const decoded = jwtDecode<{ role: string; email: string }>(token);
+          console.log('Decoded token (checkLoginStatus):', decoded);
           setIsLoggedIn(true);
           
           if (decoded.role === 'user') {
@@ -70,14 +71,22 @@ const LoginPage = (): JSX.Element => {
       if (response.data.token) {
         const token = response.data.token;
         const decoded = jwtDecode<{ role: string; email: string }>(token);
+        console.log('Decoded token (handleSubmit):', decoded);
         
         localStorage.setItem('token', token);
         document.cookie = `token=${token}; path=/; max-age=86400; secure; samesite=strict`;
+        
+        const profileResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/profile`, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          },
+          withCredentials: true
+        });
 
-        if (decoded.role === 'user') {
+        if (profileResponse.data.role === 'user') {
           router.push('/employee/');
-        } else if (decoded.role === 'admin') {
-          router.push('/admin/');
+        } else if (profileResponse.data.role === 'admin') {
+          router.push('/navigation/');
         }
       }
       
