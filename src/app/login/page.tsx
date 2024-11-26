@@ -22,14 +22,10 @@ const LoginPage = (): JSX.Element => {
   const handleGoogleSignIn = async () => {
     try {
       setIsLoading(true);
-      const result = await signIn("google", {
-        callbackUrl: "/",
-        redirect: false
+      await signIn("google", {
+        callbackUrl: `${process.env.NEXT_PUBLIC_APP_URL}/`,
+        redirect: true
       });
-      
-      if (result?.ok) {
-        router.push('/');
-      }
     } catch (err) {
       console.error('Login error:', err);
     } finally {

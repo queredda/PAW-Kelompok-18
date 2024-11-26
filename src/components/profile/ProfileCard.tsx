@@ -9,9 +9,7 @@ interface ProfileData {
   imageUrl: string;
   name: string;
   email: string;
-  companyName: string;
   accountType: string;
-  companyCode: string;
   onEditPhoto?: () => void;
 }
 
@@ -19,9 +17,7 @@ export function ProfileCard({
   imageUrl,
   name,
   email,
-  companyName,
   accountType,
-  companyCode,
   onEditPhoto
 }: ProfileData) {
   return (
@@ -50,9 +46,7 @@ export function ProfileCard({
         <div className="space-y-4 w-full max-w-3xl">
           <ProfileField label="Nama" value={name} />
           <ProfileField label="Email" value={email} />
-          <ProfileField label="Nama Perusahaan" value={companyName} />
           <ProfileField label="Tipe Akun" value={accountType} />
-          <ProfileField label="Kode Unik Perusahaan" value={companyCode} />
         </div>
       </CardContent>
     </Card>
