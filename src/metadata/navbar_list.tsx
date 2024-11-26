@@ -13,23 +13,26 @@ export const publicNavItems: NavbarProps[] = [
 ];
 
 // Protected routes (when logged in)
-export const protectedNavItems: NavbarProps[] = [
-  {
-    menu: 'Dashboard',
-    path: '/',
-  },
-  {
-    menu: 'Inventory',
-    path: '/inventory',
-  },
-  {
-    menu: 'Borrowed',
-    path: '/borrowed',
-  },
-  {
-    menu: 'Account',
-    path: '/account',
-  },
-];
+export const protectedNavItems = (role: string): NavbarProps[] => {
+  const basePath = `/${role}`;
+  return [
+    {
+      menu: 'Dashboard',
+      path: `${basePath}/`,
+    },
+    {
+      menu: 'Inventory',
+      path: `${basePath}/inventory`,
+    },
+    {
+      menu: 'Borrowed',
+      path: `${basePath}/borrowed`,
+    },
+    {
+      menu: 'Account',
+      path: `/account`,
+    },
+  ];
+};
 
 export type { NavbarProps };
