@@ -1,59 +1,9 @@
 "use client";
 
 import { BorrowedItemsTable } from "@/components/borrowed-item-table"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import type { BorrowedItem } from "@/types/inventory"
-import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useState } from 'react';
-
-const mockBorrowedItems: BorrowedItem[] = [
-  {
-    trackingId: "#20462",
-    product: { name: "Hat", image: "/placeholder.svg" },
-    customer: "Matt Dickerson",
-    date: "13/05/2022",
-    amount: 54.95,
-    paymentMode: "Transfer Bank",
-    status: "Delivered"
-  },
-  {
-    trackingId: "#18933",
-    product: { name: "Laptop", image: "/placeholder.svg" },
-    customer: "Wiktoria",
-    date: "22/05/2022",
-    amount: 58.95,
-    paymentMode: "Cash on Delivery",
-    status: "Delivered"
-  },
-  {
-    trackingId: "#45169",
-    product: { name: "iPhone", image: "/placeholder.svg" },
-    customer: "Trixie Byrd",
-    date: "15/06/2022",
-    amount: 1149.95,
-    paymentMode: "Cash on Delivery",
-    status: "Pending"
-  },
-  {
-    trackingId: "#34304",
-    product: { name: "Bag", image: "/placeholder.svg" },
-    customer: "Brad Mason",
-    date: "06/09/2022",
-    amount: 899.95,
-    paymentMode: "Transfer Bank",
-    status: "Delivered"
-  },
-  {
-    trackingId: "#17188",
-    product: { name: "Headset", image: "/placeholder.svg" },
-    customer: "Sanderson",
-    date: "25/09/2022",
-    amount: 32.95,
-    paymentMode: "Cash on Delivery",
-    status: "Delivered"
-  }
-]
+import { mockBorrowedItems } from "@/data/mockBorrowedItems"
 
 export default function BorrowedItemsPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -66,7 +16,6 @@ export default function BorrowedItemsPage() {
     item.product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.date.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.paymentMode.toLowerCase().includes(searchQuery.toLowerCase()) ||
     item.status.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
@@ -94,8 +43,8 @@ export default function BorrowedItemsPage() {
 
   return (
     <div className="space-y-8 w-full min-h-screen bg-Background-A p-4 md:p-8">
-      <h1 className="text-xl md:text-2xl font-bold text-Text-A mb-4 md:mb-6">
-        Table of loan requests
+      <h1 className="text-xl md:text-2xl font-bold text-Text-A mb-4 md:mb-6 text-center">
+        Table of Borrowed Items
       </h1>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div className="flex flex-wrap items-center gap-2">
@@ -122,37 +71,12 @@ export default function BorrowedItemsPage() {
         </div>
       </div>
       <div className="overflow-x-auto">
-        <BorrowedItemsTable items={paginatedItems} />
-      </div>
-      <div className="flex justify-center gap-2 flex-wrap">
-        <Button 
-          variant="ghost" 
-          className="text-Text-A hover:bg-Secondary-A hover:text-Text-A"
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        > 
-          <ChevronLeft />
-        </Button>
-        {[...Array(totalPages)].map((_, index) => (
-          <Button
-            key={index + 1}
-            variant="default"
-            className={`text-sm md:text-base ${
-              currentPage === index + 1 ? 'bg-Secondary-A text-Text-A hover:bg-Secondary-A/80' : 'text-Text-A'
-            } text-Text-A`}
-            onClick={() => handlePageChange(index + 1)}
-          >
-            {index + 1}
-          </Button>
-        ))}
-        <Button 
-          variant="ghost" 
-          className="text-Text-A hover:bg-Secondary-A hover:text-Text-A"
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          <ChevronRight />
-        </Button>
+        <BorrowedItemsTable 
+          items={paginatedItems}
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={handlePageChange}
+        />
       </div>
     </div>
   );
