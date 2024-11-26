@@ -22,6 +22,8 @@ const LoginPage = (): JSX.Element => {
       const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
         email,
         password
+      }, {
+        withCredentials: true
       });
 
       if (response.data.token) {
