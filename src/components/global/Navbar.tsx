@@ -23,7 +23,8 @@ import Logo from '/public/logo/LogoWhite.svg';
 const Navbar: React.FC = () => {
   const { data: session, status } = useSession();
   const isAuthenticated = status === "authenticated";
-  const navItems = isAuthenticated ? protectedNavItems : publicNavItems;
+  const role = session?.user?.role || '';
+  const navItems = isAuthenticated ? protectedNavItems(role) : publicNavItems;
 
   const screenType = useScreenType();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
