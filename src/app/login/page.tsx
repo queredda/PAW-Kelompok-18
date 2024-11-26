@@ -4,6 +4,11 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { FcGoogle } from "react-icons/fc";
 import Image from "next/image";
+import { signIn } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter();
@@ -14,78 +19,109 @@ const LoginPage = (): JSX.Element => {
     e.preventDefault();
   };
 
+  const handleGoogleSignIn = async () => {
+    try {
+      const result = await signIn("google", {
+        callbackUrl: "/",
+        redirect: true,
+      });
+      
+      if (result?.error) {
+        console.error('Login failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
+  };
+
   return (
-    <main>
-
-      {/* Login Section */}
-      <div className="flex items-center justify-center py-20">
-        <div className="bg-gradient-to-br from-[#EA68AA] to-[#8F65BB] p-8 rounded-xl shadow-lg flex items-center max-w-4xl w-full">
-          {/* Left Section */}
-          <div className="flex-1">
-            <h2 className="text-[36px] font-bold text-white mb-6">Masuk ke akunmu</h2>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              {/* Email Input */}
-              <input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="w-full px-4 py-2 rounded-[30px] bg-[#D9D9D9] text-gray-700 focus:outline-none"
-                required
+    <main className="py-20 container mx-auto flex items-center justify-center">
+      <Card className="w-full max-w-4xl bg-gradient-to-br from-[#EA68AA] to-[#8F65BB] text-white border-0 mx-4 sm:mx-0">
+        <CardContent className="p-6 sm:p-8">
+          <div className="flex flex-col lg:flex-row items-center gap-8">
+            {/* Logo Section - Shows first on mobile */}
+            <div className="lg:hidden w-full flex justify-center">
+              <Image
+                src="/logo/LogoWhite.png"
+                alt="Box Logo"
+                width={220}
+                height={300}
+                className="w-[160px] sm:w-[180px] h-auto"
+                priority
               />
-              {/* Password Input */}
-              <input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 rounded-[30px] bg-[#D9D9D9] text-gray-700 focus:outline-none"
-                required
-              />
-              <div className="flex items-center gap-[15px] mt-4">
-                {/* Login Button */}
-                <button
-                  type="submit"
-                  className="w-1/3 py-2 bg-[#413D79] text-white rounded-[30px] font-semibold hover:bg-[#4C51BF] transition">
-                  Login
-                </button>
+            </div>
 
-                {/* Google Login */}
-                <button
-                  type="button"
-                  className="flex-1 py-2 bg-[#D9D9D9] text-gray-700 rounded-[30px] font-semibold shadow hover:bg-gray-100 transition flex items-center justify-center">
-                  <FcGoogle className="inline h-5 w-5 mr-2" />
-                  Log In with Google
-                </button>
+            {/* Left Section */}
+            <div className="w-full lg:w-1/2 space-y-8">
+              <CardHeader className="p-0">
+                <CardTitle className="text-[28px] sm:text-[36px] font-bold text-center lg:text-left">
+                  Masuk ke akunmu
+                </CardTitle>
+              </CardHeader>
+
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <Input
+                  type="email"
+                  placeholder="Email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="bg-Input-A text-gray-700 rounded-full border-0 placeholder:text-gray-500"
+                  required
+                />
+                <Input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="bg-Input-A text-gray-700 rounded-full border-0 placeholder:text-gray-500"
+                  required
+                />
+                <div className="flex flex-col sm:flex-row gap-4">
+                  <Button
+                    type="submit"
+                    className="w-full sm:w-1/3 bg-[#413D79] text-white hover:bg-[#4C51BF] rounded-full border-0"
+                  >
+                    Login
+                  </Button>
+
+                  <Button
+                    type="button"
+                    onClick={handleGoogleSignIn}
+                    variant="secondary"
+                    className="w-full sm:flex-1 bg-[#D9D9D9] text-gray-700 hover:bg-gray-100 rounded-full border-0 text-Text-D font-pop "
+                  >
+                    <FcGoogle className="mr-1 h-8 w-8" />
+                    Sign In with Google
+                  </Button>
+                </div>
+              </form>
+
+              <div className="text-sm text-center lg:text-left">
+                Belum punya akun?{" "}
+                <Button
+                  variant="link"
+                  onClick={() => router.push("/register")}
+                  className="text-pink-300 hover:text-[#413d79] p-0 h-auto font-normal underline"
+                >
+                  Daftar dulu yuk
+                </Button>
               </div>
-            </form>
+            </div>
 
-            {/* Signup Link */}
-            <p className="mt-4 text-sm text-white">
-              Belum punya akun?{" "}
-              <button
-                onClick={() => router.push("/register")}
-                className="text-pink-300 underline hover:text-[#413d79]">
-                Daftar dulu yuk
-              </button>
-            </p>
+            {/* Right Section - Logo hidden on mobile */}
+            <div className="hidden lg:flex w-1/2 items-center justify-center">
+              <Image
+                src="/logo/LogoWhite.png"
+                alt="Box Logo"
+                width={220}
+                height={300}
+                className="w-[220px] h-auto"
+                priority
+              />
+            </div>
           </div>
-
-          {/* Right Section */}
-          <div className="flex items-center justify-center flex-1">
-            <Image
-              src="/logo/LogoWhite.png"
-              alt="Box Logo"
-              width={220}
-              height={300}
-              className="w-[220px] h-auto"
-              priority
-            />
-          </div>
-        </div>
-      </div>
-
-      <div className="h-[100px]"></div>
+        </CardContent>
+      </Card>
     </main>
   );
 };
