@@ -8,7 +8,6 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "@/components/ui/use-toast";
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter();
@@ -28,25 +27,11 @@ const LoginPage = (): JSX.Element => {
         redirect: false
       });
       
-      if (result?.error) {
-        toast({
-          title: "Login Failed",
-          description: result.error,
-          variant: "destructive",
-        });
-      } else if (result?.ok) {
-        toast({
-          title: "Success", 
-          description: "Logged in successfully",
-        });
+      if (result?.ok) {
         router.push('/');
       }
-    } catch (error) {
-      toast({
-        title: "Error",
-        description: "An unexpected error occurred",
-        variant: "destructive",
-      });
+    } catch (err) {
+      console.error('Login error:', err);
     } finally {
       setIsLoading(false);
     }
@@ -106,10 +91,11 @@ const LoginPage = (): JSX.Element => {
                     type="button"
                     onClick={handleGoogleSignIn}
                     variant="secondary"
-                    className="w-full sm:flex-1 bg-[#D9D9D9] text-gray-700 hover:bg-gray-100 rounded-full border-0 text-Text-D font-pop "
+                    className="w-full sm:flex-1 bg-[#D9D9D9] text-gray-700 hover:bg-gray-100 rounded-full border-0 text-Text-D font-pop"
+                    disabled={isLoading}
                   >
                     <FcGoogle className="mr-1 h-8 w-8" />
-                    Sign In with Google
+                    {isLoading ? "Signing in..." : "Sign In with Google"}
                   </Button>
                 </div>
               </form>
