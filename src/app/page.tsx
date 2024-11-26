@@ -17,9 +17,9 @@ const Home: React.FC = () => {
     <section className="container mx-auto px-20">
       <div className="flex flex-col-reverse items-center justify-between gap-16 py-16 lg:flex-row">
         <div className="max-w-xl lg:pl-12">
-          <p className="font-poppins text-[36px] font-semibold leading-tight text-white">
+          <p className="font-poppins text-[36px] font-semibold leading-tight text-white md:text-start text-center">
             Track and Manage Your Company’s Assets with Ease</p>
-          <p className="mb-8 text-[15px] pt-5 font-poppins text-base leading-relaxed text-white">
+          <p className="mb-8 text-[15px] pt-5 font-poppins text-base leading-relaxed text-white md:text-justify text-center">
               Platform kami menawarkan solusi intuitif untuk melacak dan mengelola aset
               perusahaan Anda secara efisien. Dari pengendalian inventaris hingga proses
               peminjaman yang lebih mudah, sistem kami menyederhanakan manajemen aset
@@ -27,11 +27,6 @@ const Home: React.FC = () => {
               operasional atau karyawan yang mengelola peminjaman aset pribadi, alat ini
               dirancang untuk memenuhi kebutuhan setiap pengguna.</p>
           <div className="flex flex-col gap-4 sm:flex-row">
-              <Button 
-                onClick={() => router.push("/register")}
-                className="rounded-[20px] bg-[#EA68AA] px-12 py-3 font-poppins text-[18px] font-semibold text-white transition-opacity hover:opacity-90">
-                Mendaftar
-              </Button>
               <Button 
                 onClick={() => router.push("/login")}
                 className="rounded-[20px] bg-[#8F65BB] px-12 py-3 font-poppins text-[18px] font-semibold text-white transition-opacity hover:opacity-90">
@@ -74,7 +69,7 @@ const Home: React.FC = () => {
           </div>
 
           {/* Feature Card 2 */}
-          <div className="rounded-2xl bg-gradient-to-br from-[#8F65BB] to-[#EA68AA] p-8 shadow-lg transition-transform hover:-translate-y-1">
+          <div className="rounded-2xl bg-gradient-to-br from-Linear-A-from to-Linear-A-to p-8 shadow-lg transition-transform hover:-translate-y-1">
             <div className="mb-4 flex justify-center">
             <SlHandbag className="h-12 w-12 text-white" />
             </div>
@@ -87,7 +82,7 @@ const Home: React.FC = () => {
           </div>
 
           {/* Feature Card 3 */}
-          <div className="rounded-2xl bg-gradient-to-br from-[#EA68AA] to-[#8F65BB] p-8 shadow-lg transition-transform hover:-translate-y-1">
+          <div className="rounded-2xl bg-gradient-to-br from-Linear-A-from to-Linear-A-to p-8 shadow-lg transition-transform hover:-translate-y-1">
             <div className="mb-4 flex justify-center">
             <FiFileText className="h-12 w-12 text-white" />
             </div>
