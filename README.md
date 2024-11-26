@@ -1,5 +1,5 @@
 # 📦 Apakah barang-barang di perusahaan Anda sering hilang atau tidak terpantau dengan baik?
-Mengelola Inventaris Lebih Mudah, Efisien, dan Akurat dengan website BOX: Inventory Management System. 
+Mengelola Inventaris Lebih Mudah, Efisien, dan Akurat dengan website **BOX: Inventory Management System**. Platform kami berfokus pada kebutuhan perusahaan dalam mengelola dan memonitor barang-barang yang dimiliki secara efisien. Di banyak perusahaan, pengelolaan inventaris barang sering kali dilakukan secara manual, yang dapat menimbulkan kesalahan pencatatan, kesulitan dalam melacak penggunaan barang, dan potensi kehilangan barang. 
 
 ## 📚 Team Member
 - **Mahsa Quereda Bahjah** (22/503299/TK/54984) as Full-Stack Engineer
@@ -8,11 +8,20 @@ Mengelola Inventaris Lebih Mudah, Efisien, dan Akurat dengan website BOX: Invent
 - **Raden Aryo Bismo Nugroho** (22/494473/TK/54233) as Front-End Engineer
 - **Septian Eka Rahmadi** (22/496732/TK/54442) as UI/UX Designer
 
-## 🎥 Additional Link:
+## 🎥 Additional Link
 - **[UI/UX Design - Figma Project](https://www.figma.com/design/3NqihbD5xevgfBMOysujjm/Design-Project-for-PAW-'22-(Kelompok-18)?node-id=141-161&t=ZmS1KWjpDizir9xd-1)**
 - **[Presentation Slide](https://www.canva.com/design/DAGXim_fyEY/Fy4oXQnGOJE3ephB4BNBmQ/edit?utm_content=DAGXim_fyEY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)**
 - **[Presentation Video](https://www.youtube.com/)**
 
+## 💡 Project Overview
+Platform kami menawarkan solusi intuitif untuk melacak dan mengelola aset perusahaan Anda secara efisien. Dari pengendalian inventaris hingga proses peminjaman yang lebih mudah, sistem kami menyederhanakan manajemen aset hanya dengan beberapa klik. Baik Anda seorang admin yang mengawasi operasional atau karyawan yang mengelola peminjaman aset pribadi, alat ini dirancang untuk memenuhi kebutuhan setiap pengguna. Platform ini adalah project dalam matakuliah Pengembangan Aplikasi Web di Departemen Teknik Elektro dan Teknologi Informasi, Fakultas Teknik, Universitas Gadjah Mada. 
+
+## ⚙️ Fitur-Fitur
+- **Pelacakan Inventaris Secara Real-Time**: Pantau status seluruh aset perusahaan, mulai dari stok yang tersedia hingga barang yang sedang dipinjam.
+- **Proses Peminjaman dan Pengembalian yang Sederhana**: Karyawan dapat dengan cepat meminjam dan mengembalikan aset, sementara admin tetap mendapat notifikasi terkait semua aktivitas.
+- **Laporan yang komperhensif**: Dapatkan wawasan mendalam dengan laporan lengkap mengenai inventaris, riwayat peminjaman, dan kondisi aset.
+
+## 👤 Use Case Diagram
 
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
