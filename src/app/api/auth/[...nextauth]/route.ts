@@ -14,7 +14,7 @@ const handler = NextAuth({
       if (account?.provider === 'google') {
         try {
           const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
+            `${process.env.BACKEND_URL}/auth/login`,
             {
               email: user.email,
               name: user.name, 
@@ -22,26 +22,38 @@ const handler = NextAuth({
               googleId: profile?.sub,
             },
             {
+              headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+              },
               withCredentials: true
             }
           );
           
           if (response.data.message === "Logged in successfully") {
-            // Store the JWT token from cookies
             const cookies = response.headers['set-cookie'];
-            if (cookies) {
-              const jwtCookie = cookies.find(cookie => cookie.startsWith('jwt='));
-              if (jwtCookie) {
-                const jwt = jwtCookie.split(';')[0].split('=')[1];
-                account.access_token = jwt;
-                console.log('JWT Token:', jwt);
-              }
+            if (!cookies) {
+              console.error('No cookies received from backend');
+              return false;
             }
+
+            const jwtCookie = cookies.find(cookie => cookie.startsWith('jwt='));
+            if (!jwtCookie) {
+              console.error('JWT cookie not found in response');
+              return false;
+            }
+
+            const jwt = jwtCookie.split(';')[0].split('=')[1];
+            account.access_token = jwt;
+            return true;
           }
-          
-          return true;
+          return false;
         } catch (error) {
-          console.error('Error during Google sign in:', error);
+          if (axios.isAxiosError(error)) {
+            console.error('Google sign in failed:', error.response?.data || error.message);
+          } else {
+            console.error('Unexpected error during sign in:', error);
+          }
           return false;
         }
       }
@@ -58,8 +70,12 @@ const handler = NextAuth({
     async session({ session, token }) {
       session.accessToken = token.accessToken as string;
       return session;
-    }
-  }
+    },
+  },
+  pages: {
+    signIn: '/login',
+    error: '/login',
+  },
 });
 
 export { handler as GET, handler as POST };

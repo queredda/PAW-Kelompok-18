@@ -8,12 +8,13 @@ import { signIn } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
+import { toast } from "@/components/ui/use-toast";
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,16 +22,33 @@ const LoginPage = (): JSX.Element => {
 
   const handleGoogleSignIn = async () => {
     try {
+      setIsLoading(true);
       const result = await signIn("google", {
         callbackUrl: "/",
-        redirect: true,
+        redirect: false
       });
       
       if (result?.error) {
-        console.error('Login failed:', result.error);
+        toast({
+          title: "Login Failed",
+          description: result.error,
+          variant: "destructive",
+        });
+      } else if (result?.ok) {
+        toast({
+          title: "Success", 
+          description: "Logged in successfully",
+        });
+        router.push('/');
       }
     } catch (error) {
-      console.error('Login failed:', error);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
     }
   };
 
