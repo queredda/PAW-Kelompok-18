@@ -13,9 +13,20 @@ const config: Config = {
   			pop: ['Poppins', 'sans-serif']
   		},
   		colors: {
+				Linear: {
+					A: {
+						from: '#EA68AA',
+						to: '#8F65BB'
+					}
+				},
+				Input: {
+					A: '#D9D9D9'
+				},
   			Text: {
   				A: '#FFFFFF',
-  				B: '#ABB7C2'
+  				B: '#ABB7C2',
+					C: '#CF67AF',
+					D: '#000000'
   			},
   			Background: {
   				A: '#162857'
