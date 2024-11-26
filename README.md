@@ -13,7 +13,7 @@ Mengelola Inventaris Lebih Mudah, Efisien, dan Akurat dengan website **BOX: Inve
 ## 🎥 Additional Link
 - **[UI/UX Design - Figma Project](https://www.figma.com/design/3NqihbD5xevgfBMOysujjm/Design-Project-for-PAW-'22-(Kelompok-18)?node-id=141-161&t=ZmS1KWjpDizir9xd-1)**
 - **[Presentation Slide](https://www.canva.com/design/DAGXim_fyEY/Fy4oXQnGOJE3ephB4BNBmQ/edit?utm_content=DAGXim_fyEY&utm_campaign=designshare&utm_medium=link2&utm_source=sharebutton)**
-- **[Presentation Video](https://www.youtube.com/)**
+- **[Presentation Video](https://drive.google.com/drive/folders/15W9UtczAbL0VtzNy8aoDglAYXx8iyj1N?usp=sharing)**
 - **[Back-End Repository](https://github.com/farreladriann/backend-boxsystem)**
 
 ## 💡 Project Overview
