@@ -1,18 +1,18 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
-import Image from "next/image";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import axios from "axios";
-import jwtDecode from "jwt-decode";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import axios from 'axios';
+import { jwtDecode } from 'jwt-decode';
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -24,7 +24,7 @@ const LoginPage = (): JSX.Element => {
           const decoded = jwtDecode<{ role: string; email: string }>(token);
           console.log('Decoded token (checkLoginStatus):', decoded);
           setIsLoggedIn(true);
-          
+
           if (decoded.role === 'user') {
             router.push('/employee/');
           } else if (decoded.role === 'admin') {
@@ -44,7 +44,7 @@ const LoginPage = (): JSX.Element => {
     try {
       setIsLoading(true);
       await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout`, {
-        withCredentials: true
+        withCredentials: true,
       });
       localStorage.removeItem('token');
       setIsLoggedIn(false);
@@ -60,28 +60,35 @@ const LoginPage = (): JSX.Element => {
     e.preventDefault();
     try {
       setIsLoading(true);
-      
-      const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`, {
-        email,
-        password
-      }, {
-        withCredentials: true
-      });
+
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
+        {
+          email,
+          password,
+        },
+        {
+          withCredentials: true,
+        }
+      );
 
       if (response.data.token) {
         const token = response.data.token;
         const decoded = jwtDecode<{ role: string; email: string }>(token);
         console.log('Decoded token (handleSubmit):', decoded);
-        
+
         localStorage.setItem('token', token);
         document.cookie = `token=${token}; path=/; max-age=86400; secure; samesite=strict`;
-        
-        const profileResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/profile`, {
-          headers: {
-            'Authorization': `Bearer ${token}`
-          },
-          withCredentials: true
-        });
+
+        const profileResponse = await axios.get(
+          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/profile`,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            withCredentials: true,
+          }
+        );
 
         if (profileResponse.data.role === 'user') {
           router.push('/employee/');
@@ -89,7 +96,6 @@ const LoginPage = (): JSX.Element => {
           router.push('/navigation/');
         }
       }
-      
     } catch (err) {
       console.error('Login error:', err);
     } finally {
@@ -118,7 +124,7 @@ const LoginPage = (): JSX.Element => {
             <div className="w-full lg:w-1/2 space-y-8">
               <CardHeader className="p-0">
                 <CardTitle className="text-[28px] sm:text-[36px] font-bold text-center lg:text-left">
-                  {isLoggedIn ? "Keluar dari akunmu" : "Masuk ke akunmu"}
+                  {isLoggedIn ? 'Keluar dari akunmu' : 'Masuk ke akunmu'}
                 </CardTitle>
               </CardHeader>
 
@@ -128,7 +134,7 @@ const LoginPage = (): JSX.Element => {
                   className="w-full bg-[#413D79] text-white hover:bg-[#4C51BF] rounded-full border-0"
                   disabled={isLoading}
                 >
-                  {isLoading ? "Loading..." : "Logout"}
+                  {isLoading ? 'Loading...' : 'Logout'}
                 </Button>
               ) : (
                 <>
@@ -155,16 +161,16 @@ const LoginPage = (): JSX.Element => {
                         className="w-full bg-[#413D79] text-white hover:bg-[#4C51BF] rounded-full border-0"
                         disabled={isLoading}
                       >
-                        {isLoading ? "Loading..." : "Login"}
+                        {isLoading ? 'Loading...' : 'Login'}
                       </Button>
                     </div>
                   </form>
 
                   <div className="text-sm text-center lg:text-left">
-                    Belum punya akun?{" "}
+                    Belum punya akun?{' '}
                     <Button
                       variant="link"
-                      onClick={() => router.push("/register")}
+                      onClick={() => router.push('/register')}
                       className="text-pink-300 hover:text-[#413d79] p-0 h-auto font-normal underline"
                     >
                       Daftar dulu yuk
