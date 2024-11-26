@@ -18,10 +18,10 @@ interface InventoryTableProps {
 
 export function InventoryTable({ items }: InventoryTableProps) {
   return (
-    <div className="rounded-md border border-white/10 bg-white/5 overflow-x-auto">
+    <div className="rounded-md border border-white/5 bg-white/5 overflow-x-auto">
       <Table>
         <TableHeader>
-          <TableRow>
+          <TableRow className="border-white/20">
             <TableHead className="text-Text-A min-w-[100px]">Items ID</TableHead>
             <TableHead className="text-Text-A min-w-[150px]">Items</TableHead>
             <TableHead className="text-Text-A min-w-[120px]">Category</TableHead>
