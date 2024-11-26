@@ -22,7 +22,7 @@ Platform kami menawarkan solusi intuitif untuk melacak dan mengelola aset perusa
 - **Laporan yang komperhensif**: Dapatkan wawasan mendalam dengan laporan lengkap mengenai inventaris, riwayat peminjaman, dan kondisi aset.
 
 ## 👤 Use Case Diagram
-![Alt Text](public/use-case-diagram/Box Use-Case (svg).svg)
+![Alt Text](public/use-case-diagram/Box-Use-Case.svg)
 
 
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
