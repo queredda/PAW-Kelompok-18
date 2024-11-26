@@ -27,10 +27,30 @@ Platform kami menawarkan solusi intuitif untuk melacak dan mengelola aset perusa
 ## 👤 Use Case Diagram
 ![Alt Text](public/use-case-diagram/Box-Use-Case.svg)
 
+## 🛠️ Dependencies
 
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Semua dependensi yang digunakan dalam proyek ini tercantum dalam file `package.json`. Untuk menginstal semua dependensi yang diperlukan, cukup jalankan perintah berikut:
 
-## Getting Started
+```bash
+npm install
+```
+
+Ini akan mengunduh dan menginstal semua paket yang tercantum dalam file `package.json`, baik untuk pengembangan maupun untuk menjalankan aplikasi di lingkungan produksi.
+
+**Ringkasan Dependensi:**
+- **`react`** dan **`react-dom`**: Library utama untuk membangun aplikasi antarmuka pengguna berbasis React.
+- **`express`**: Framework untuk membangun server dan API di sisi backend.
+- **`axios`**: Library untuk melakukan HTTP requests antara frontend dan backend.
+- **`mongoose`**: ODM (Object Data Modeling) untuk MongoDB, digunakan untuk mengelola interaksi dengan database.
+- **`jsonwebtoken`**: Digunakan untuk autentikasi berbasis token (JWT).
+- **`react-router-dom`**: Library untuk routing di aplikasi React.
+
+Selain itu, proyek ini juga menggunakan beberapa dependensi pengembangan seperti:
+- **`webpack`**, **`babel`**: Untuk bundling dan transpiling kode JavaScript.
+- **`eslint`** dan **`prettier`**: Untuk memastikan kualitas kode dan konsistensi gaya pengkodean.
+- **`jest`** dan **`cypress`**: Untuk unit testing dan end-to-end testing.
+
+## 🚀 Getting Started
 
 First, run the development server:
 
@@ -49,18 +69,3 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
