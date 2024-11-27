@@ -1,14 +1,29 @@
  interface InventoryItem {
   id: string
   name: string
-  category: string
-  location: string
-  quantity: number
-  image: string
+  kategori: string
+  kondisi: string
+  paymentMethod: string
+  kuantitas: number
+  imageUrl: string
   status: 'Available' | 'Borrowed'
 }
 
- interface BorrowedItem {
+//  interface BorrowedItem {
+//   _id: string,
+//   inventoryId: string,
+//   userId: string,
+//   name: string,
+//   kuantitas: number,
+//   status: "Delivered",
+//   isReturned: boolean,
+//   returnedCondition: "baik",
+//   loanId: 4,
+//   __v: 0, 
+//   namaUser: "Anonymous"
+// }
+
+interface BorrowedItem {
   trackingId: string
   product: {
     name: string
