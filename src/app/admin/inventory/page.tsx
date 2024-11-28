@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation'
+import { InventoryItem } from '@/types/inventory';
 
 // const mockItems: InventoryItem[] = [
 //   {
@@ -77,7 +77,6 @@ import { useRouter } from 'next/navigation'
 // ];
 
 export default function InventoryPage() {
-  const router = useRouter();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
@@ -137,10 +136,6 @@ export default function InventoryPage() {
     setCurrentPage(1); // Reset to first page when searching
   };
 
-  const handleItemClick = () => {
-    router.push('/employee/loan');
-  };
-
   if (loading) {
     return <p className="text-white text-center">Loading...</p>;
   }
@@ -173,6 +168,8 @@ export default function InventoryPage() {
             type="search"
             placeholder="Search..."
             className="bg-white/10 text-Text-A text-sm md:text-base w-full md:w-auto"
+            value={searchTerm}
+            onChange={handleSearch}
           />
           <Button asChild className="w-full md:w-auto text-Text-A bg-Secondary-A hover:bg-Secondary-A/80">
             <Link href="/admin/inventory/add">+ Add New Item</Link>

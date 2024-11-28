@@ -1,8 +1,4 @@
-// import { PencilIcon, TrashIcon } from 'lucide-react'
 import Image from "next/image"
-import { useRouter } from 'next/navigation';
-
-import { Button } from "@/components/ui/button"
 import {
   Table,
   TableBody,
@@ -18,8 +14,6 @@ interface InventoryTableProps {
 }
 
 export function InventoryTable({ items }: InventoryTableProps) {
-  const router = useRouter(); // Initialize router
-
   return (
     <div className="rounded-md border border-white/5 bg-white/5 overflow-x-auto">
       <Table>
@@ -30,8 +24,6 @@ export function InventoryTable({ items }: InventoryTableProps) {
             <TableHead className="text-Text-A min-w-[120px]">Category</TableHead>
             <TableHead className="text-Text-A min-w-[120px]">Condition</TableHead>
             <TableHead className="text-Text-A min-w-[100px]">Status</TableHead>
-            <TableHead className="text-Text-A min-w-[120px]">Payment Method</TableHead>
-            {/* <TableHead className="text-Text-A min-w-[100px]">Action</TableHead> */}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -63,34 +55,7 @@ export function InventoryTable({ items }: InventoryTableProps) {
                   {item.status}
                 </span>
               </TableCell>
-              <TableCell className="text-Text-A">{item.paymentMethod}</TableCell>
-              {/* <TableCell>
-                <div className="flex items-center gap-2">
-                  <Button 
-                    size="icon" 
-                    variant="ghost" 
-                    className="h-8 w-8 text-Text-A"
-                    onClick={() => {
-                      const selectedItem = {
-                        name: item.name,
-                        category: item.kategori,
-                        image: item.imageUrl,
-                      };
-
-                      // Simpan data ke localStorage
-                      localStorage.setItem("selectedItem", JSON.stringify(selectedItem));
-
-                      // Redirect ke halaman item-loan-form
-                      router.push("/item-loan-form");
-                    }}
-                  >
-                    <PencilIcon className="h-4 w-4" />
-                  </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-Text-A">
-                    <TrashIcon className="h-4 w-4" />
-                  </Button>
-                </div>
-              </TableCell> */}
+            
             </TableRow>
           ))}
         </TableBody>

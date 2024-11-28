@@ -30,7 +30,6 @@ export function InventoryTable({ items }: InventoryTableProps) {
             <TableHead className="text-Text-A min-w-[120px]">Category</TableHead>
             <TableHead className="text-Text-A min-w-[120px]">Condition</TableHead>
             <TableHead className="text-Text-A min-w-[100px]">Status</TableHead>
-            <TableHead className="text-Text-A min-w-[120px]">Payment Method</TableHead>
             <TableHead className="text-Text-A min-w-[100px]">Action</TableHead>
           </TableRow>
         </TableHeader>
@@ -63,7 +62,6 @@ export function InventoryTable({ items }: InventoryTableProps) {
                   {item.status}
                 </span>
               </TableCell>
-              <TableCell className="text-Text-A">{item.paymentMethod}</TableCell>
               <TableCell>
                 <div className="flex items-center gap-2">
                   <Button 

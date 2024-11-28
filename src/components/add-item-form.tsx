@@ -12,7 +12,6 @@ export function AddItemForm() {
     name: '',
     totalKuantitas: '',
     kategori: '',
-    paymentMethod: '',
   });
   const [image, setImage] = useState<string | null>(null);
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -51,7 +50,6 @@ export function AddItemForm() {
       formDataToSend.append('name', formData.name);
       formDataToSend.append('totalKuantitas', formData.totalKuantitas);
       formDataToSend.append('kategori', formData.kategori);
-      formDataToSend.append('paymentMethod', formData.paymentMethod);
       
       if (imageFile) {
         formDataToSend.append('image', imageFile);
@@ -71,7 +69,6 @@ export function AddItemForm() {
         name: '',
         totalKuantitas: '',
         kategori: '',
-        paymentMethod: '',
       });
       setImage(null);
       setImageFile(null);
@@ -123,15 +120,6 @@ export function AddItemForm() {
                   placeholder="Kuantitas item"
                   className="bg-Input-A mt-1 text-Text-D rounded-[30px] px-4 w-full"
                   required
-                />
-              </div>
-              <div>
-                <Input
-                  id="paymentMethod"
-                  value={formData.paymentMethod}
-                  onChange={handleInputChange}
-                  placeholder="Metode pembayaran"
-                  className="bg-Input-A mt-1 text-Text-D rounded-[30px] px-4 w-full"
                 />
               </div>
               <div>

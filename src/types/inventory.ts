@@ -1,9 +1,8 @@
- interface InventoryItem {
+interface InventoryItem {
   id: string
   name: string
   kategori: string
   kondisi: string
-  paymentMethod: string
   kuantitas: number
   imageUrl: string
   status: 'Available' | 'Borrowed'
@@ -32,11 +31,10 @@ interface BorrowedItem {
   customer: string
   date: string
   amount: number
-  paymentMode: string
   status: string
 }
 
- interface InventoryStats {
+interface InventoryStats {
   totalItems: number
   goodCondition: number
   badCondition: number
@@ -48,9 +46,19 @@ interface BorrowedStats {
   totalReturned: number
 }
 
+interface Stats {
+  totalItems: number;
+  availableItems: number;
+  borrowedItems: number;
+  totalUsers: number;
+  totalRequests: number;
+  pendingRequests: number;
+  completedRequests: number;
+}
+
 interface NavbarProps {
   menu: string;
   path: string;
 }
 
-export type { NavbarProps, InventoryItem, BorrowedItem, InventoryStats, BorrowedStats };
+export type { NavbarProps, InventoryItem, BorrowedItem, InventoryStats, BorrowedStats, Stats };

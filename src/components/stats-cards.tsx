@@ -8,65 +8,40 @@ interface StatsCardsProps {
 
 export function StatsCards({ stats }: StatsCardsProps) {
   return (
-    <div className="grid gap-4 grid-cols-1 md:grid-cols-5 px-[40px] md:px-0">
-      <Card className="bg-pink-400/90 text-Text-A">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-[16px] md:text-[18px] font-pop font-medium">
-            Total Items
-          </CardTitle>
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 px-4 md:px-8">
+      <Card className="bg-white/10 border-white/20">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-Text-A">Total Items</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-[48px] md:text-[60px] text-center font-bold">
-            {stats.totalItem}
-          </div>
+          <div className="text-2xl font-bold text-Text-A">{stats.totalItems}</div>
         </CardContent>
       </Card>
-      <Card className="bg-pink-400/80 text-Text-A">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-[16px] md:text-[18px] font-pop font-medium">
-            Good Condition Items
-          </CardTitle>
+
+      <Card className="bg-white/10 border-white/20">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-Text-A">Available Items</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-[48px] md:text-[60px] text-center font-bold">
-            {stats.totalItemBaik}
-          </div>
+          <div className="text-2xl font-bold text-Text-A">{stats.availableItems}</div>
         </CardContent>
       </Card>
-      <Card className="bg-pink-400/70 text-Text-A">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-[16px] md:text-[18px] font-pop font-medium">
-            Damaged Items
-          </CardTitle>
+
+      <Card className="bg-white/10 border-white/20">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-Text-A">Borrowed Items</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-[48px] md:text-[60px] text-center font-bold">
-            {stats.totalItemRusak}
-          </div>
+          <div className="text-2xl font-bold text-Text-A">{stats.borrowedItems}</div>
         </CardContent>
       </Card>
-      <Card className="bg-pink-400/60 text-Text-A">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-[16px] md:text-[18px] font-pop font-medium">
-            Items Borrowed
-          </CardTitle>
+
+      <Card className="bg-white/10 border-white/20">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-Text-A">Total Requests</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-[48px] md:text-[60px] text-center font-bold">
-            {stats.totalItemDipinjam}
-          </div>
-        </CardContent>
-      </Card>
-      <Card className="bg-pink-400/50 text-Text-A">
-        <CardHeader className="pb-2">
-          <CardTitle className="text-[16px] md:text-[18px] font-pop font-medium">
-            Borrow Requests
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-[48px] md:text-[60px] text-center font-bold">
-            {stats.totalPermintaanPeminjaman}
-          </div>
+          <div className="text-2xl font-bold text-Text-A">{stats.totalRequests}</div>
         </CardContent>
       </Card>
     </div>
