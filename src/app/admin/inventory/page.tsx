@@ -5,94 +5,121 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
+import { useRouter } from 'next/navigation'
 
-type InventoryItem = {
-  id: string;
-  name: string;
-  category: string;
-  location: string;
-  quantity: number;
-  image: string;
-  status: string;
-};
+// const mockItems: InventoryItem[] = [
+//   {
+//     id: '#20462',
+//     name: 'Hat',
+//     category: 'Accessories',
+//     location: 'Warehouse A',
+//     quantity: 5,
+//     image: '/placeholder.svg',
+//     status: 'Available',
+//   },
+//   {
+//     id: '#20463',
+//     name: 'Laptop',
+//     category: 'Electronics',
+//     location: 'Warehouse B',
+//     quantity: 10,
+//     image: '/placeholder.svg',
+//     status: 'Borrowed',
+//   },
+//   {
+//     id: '#11351',
+//     name: 'Iphone',
+//     category: 'Electronics',
+//     location: 'Warehouse B',
+//     quantity: 10,
+//     image: '/placeholder.svg',
+//     status: 'Borrowed',
+//   },
+//   {
+//     id: '#14124',
+//     name: 'Android',
+//     category: 'Electronics',
+//     location: 'Warehouse B',
+//     quantity: 10,
+//     image: '/placeholder.svg',
+//     status: 'Borrowed',
+//   },
+//   {
+//     id: '#315351',
+//     name: 'Meja',
+//     category: 'Furniture',
+//     location: 'Warehouse B',
+//     quantity: 10,
+//     image: '/placeholder.svg',
+//     status: 'Borrowed',
+//   },
+//   {
+//     id: '#352545',
+//     name: 'Kursi',
+//     category: 'Furniture',
+//     location: 'Warehouse B',
+//     quantity: 10,
+//     image: '/placeholder.svg',
+//     status: 'Borrowed',
+//   },
+//   {
+//     id: '#542562',
+//     name: 'Lemari',
+//     category: 'Furniture',
+//     location: 'Warehouse B',
+//     quantity: 10,
+//     image: '/placeholder.svg',
+//     status: 'Borrowed',
+//   },
 
-const mockItems: InventoryItem[] = [
-  {
-    id: '#20462',
-    name: 'Hat',
-    category: 'Accessories',
-    location: 'Warehouse A',
-    quantity: 5,
-    image: '/placeholder.svg',
-    status: 'Available',
-  },
-  {
-    id: '#20463',
-    name: 'Laptop',
-    category: 'Electronics',
-    location: 'Warehouse B',
-    quantity: 10,
-    image: '/placeholder.svg',
-    status: 'Borrowed',
-  },
-  {
-    id: '#11351',
-    name: 'Iphone',
-    category: 'Electronics',
-    location: 'Warehouse B',
-    quantity: 10,
-    image: '/placeholder.svg',
-    status: 'Borrowed',
-  },
-  {
-    id: '#14124',
-    name: 'Android',
-    category: 'Electronics',
-    location: 'Warehouse B',
-    quantity: 10,
-    image: '/placeholder.svg',
-    status: 'Borrowed',
-  },
-  {
-    id: '#315351',
-    name: 'Meja',
-    category: 'Furniture',
-    location: 'Warehouse B',
-    quantity: 10,
-    image: '/placeholder.svg',
-    status: 'Borrowed',
-  },
-  {
-    id: '#352545',
-    name: 'Kursi',
-    category: 'Furniture',
-    location: 'Warehouse B',
-    quantity: 10,
-    image: '/placeholder.svg',
-    status: 'Borrowed',
-  },
-  {
-    id: '#542562',
-    name: 'Lemari',
-    category: 'Furniture',
-    location: 'Warehouse B',
-    quantity: 10,
-    image: '/placeholder.svg',
-    status: 'Borrowed',
-  },
-
-];
+// ];
 
 export default function InventoryPage() {
+  const router = useRouter();
+  const [items, setItems] = useState<InventoryItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
-  
-  const totalPages = Math.ceil(mockItems.length / entriesPerPage);
-  const paginatedItems = mockItems.slice(
+  const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    const fetchItems = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          "https://api.boxsystem.site/admin/inventory"
+        );
+        setItems(response.data);
+      } catch (err) {
+        setError("Failed to fetch inventory data.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, []);
+
+  const filteredItems = items.filter((item) => {
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      item.name.toLowerCase().includes(searchLower) ||
+      item.kategori.toLowerCase().includes(searchLower) ||
+      item.kondisi.toLowerCase().includes(searchLower) ||
+      item.status.toLowerCase().includes(searchLower)
+    );
+  });
+
+  const totalPages = Math.ceil(filteredItems.length / entriesPerPage);
+  const paginatedItems = filteredItems.slice(
     (currentPage - 1) * entriesPerPage,
     currentPage * entriesPerPage
   );
+
 
   const handlePageChange = (page: number) => {
     if (page >= 1 && page <= totalPages) {
@@ -104,6 +131,23 @@ export default function InventoryPage() {
     setEntriesPerPage(Number(e.target.value));
     setCurrentPage(1);
   };
+
+  const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+    setCurrentPage(1); // Reset to first page when searching
+  };
+
+  const handleItemClick = () => {
+    router.push('/employee/loan');
+  };
+
+  if (loading) {
+    return <p className="text-white text-center">Loading...</p>;
+  }
+
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
+  }
 
   return (
     <div className="space-y-8 w-full min-h-screen bg-Background-A p-4 md:p-8">

@@ -1,57 +1,48 @@
 "use client";
 
-import React, { useState } from 'react'
-import { InventoryTable } from "@/components/inventory-table"
+import React, { useState, useEffect } from 'react'
+import axios from "axios"
+import { InventoryTable } from "@/components/items-for-loan"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { InventoryItem } from "@/types/inventory"
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation'
 
-const mockItems: InventoryItem[] = [
-  {
-    id: "#20462",
-    name: "Hat",
-    category: "Accessories", 
-    location: "Warehouse A",
-    quantity: 5,
-    image: "/placeholder.svg",
-    status: "Available",
-  },
-  {
-    id: "#20463",
-    name: "Laptop",
-    category: "Electronics",
-    location: "Warehouse B", 
-    quantity: 10,
-    image: "/placeholder.svg",
-    status: "Borrowed",
-  },
-  {
-    id: "#32322",
-    name: "Kentang",
-    category: "Electronics",
-    location: "Warehouse B",
-    quantity: 10,
-    image: "/placeholder.svg", 
-    status: "Borrowed",
-  },
-]
-
 export default function InventoryPage() {
   const router = useRouter();
+  const [items, setItems] = useState<InventoryItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   
-  // Filter items based on search term
-  const filteredItems = mockItems.filter(item => {
+  useEffect(() => {
+    const fetchItems = async () => {
+      setLoading(true);
+      try {
+        const response = await axios.get(
+          "https://api.boxsystem.site/user/inventory"
+        );
+        setItems(response.data);
+      } catch (err) {
+        setError("Failed to fetch inventory data.");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchItems();
+  }, []);
+
+  const filteredItems = items.filter((item) => {
     const searchLower = searchTerm.toLowerCase();
     return (
       item.name.toLowerCase().includes(searchLower) ||
-      item.category.toLowerCase().includes(searchLower) ||
-      item.location.toLowerCase().includes(searchLower) ||
-      item.id.toLowerCase().includes(searchLower) ||
+      item.kategori.toLowerCase().includes(searchLower) ||
+      item.kondisi.toLowerCase().includes(searchLower) ||
       item.status.toLowerCase().includes(searchLower)
     );
   });
@@ -81,6 +72,14 @@ export default function InventoryPage() {
   const handleItemClick = () => {
     router.push('/employee/loan');
   };
+
+  if (loading) {
+    return <p className="text-white text-center">Loading...</p>;
+  }
+
+  if (error) {
+    return <p className="text-red-500">{error}</p>;
+  }
 
   return (
     <div className="space-y-8 w-full min-h-screen bg-Background-A p-4 md:p-8">

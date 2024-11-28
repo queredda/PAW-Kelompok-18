@@ -1,6 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import axios from "axios";
+// import { useSearchParams } from 'next/navigation';
 import { ImagePlus } from 'lucide-react';
 import Image from 'next/image';
 import { Button } from '@/components/ui/button';
@@ -8,26 +10,38 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 
 export function ItemLoanForm() {
-  const [selectedItem, setSelectedItem] = useState<{
-    name: string;
-    category: string;
-    image: string | null;
-  } | null>(null);
+  // const searchParams = useSearchParams();
 
-  // Mock function to simulate fetching item data
-  const handleItemSelect = (itemName: string) => {
-    // This would be replaced with actual API call
-    // Mock data for demonstration
-    const mockItem = {
-      name: itemName,
-      category: "Sample Category",
-      image: "/path/to/item/image.jpg" // This would come from your API
-    };
-    setSelectedItem(mockItem);
-  };
+   // Initialize state for selected item
+   const [selectedItem, setSelectedItem] = useState({
+    name: "",
+    category: "",
+    image: "",
+  });
+
+  useEffect(() => {
+    // Ambil data dari localStorage
+    const storedItem = localStorage.getItem("selectedItem");
+    if (storedItem) {
+      const parsedItem = JSON.parse(storedItem);
+      setSelectedItem(parsedItem);
+
+      // Contoh validasi data dengan API (opsional)
+      axios
+        .get(`/api/validate-item?name=${parsedItem.name}`)
+        .then((response) => {
+          // Jika validasi berhasil, data tetap digunakan
+          console.log("Validation successful:", response.data);
+        })
+        .catch((error) => {
+          console.error("Validation failed:", error);
+          // Jika gagal, Anda bisa reset state atau beri notifikasi
+        });
+    }
+  }, []);
 
   return (
-    <Card className="bg-gradient-to-br from-Linear-A-from to-Linear-A-to text-Text-A border-none px-4 sm:px-10 py-3 sm:py-5 w-full max-w-[95vw] mx-auto">
+    <Card className="bg-gradient-to-br from-[#EA68AA] via-[#8B5799] to-[#264491] text-Text-A border-none px-4 sm:px-10 py-3 sm:py-5 w-full max-w-[95vw] mx-auto">
       <CardContent className="p-3 sm:p-6">
         <h2 className="text-[24px] sm:text-[30px] font-semibold font-pop mb-4 sm:mb-6 text-center sm:text-left">
           Formulir Peminjaman
@@ -38,17 +52,18 @@ export function ItemLoanForm() {
               <Input
                 id="name"
                 placeholder="Nama item"
-                className="bg-Input-A mt-1 text-Text-D rounded-[30px] px-4 w-full"
-                onChange={(e) => handleItemSelect(e.target.value)}
+                value={selectedItem.name}
+                readOnly
+                className="bg-Input-A mt-1 text-black rounded-[30px] px-4 w-full"
               />
             </div>
             <div>
               <Input
                 id="category"
                 placeholder="Kategori item"
-                value={selectedItem?.category || ''}
+                value={selectedItem.category}
                 readOnly
-                className="bg-Input-A mt-1 text-Text-D rounded-[30px] px-4 w-full"
+                className="bg-Input-A mt-1 text-black rounded-[30px] px-4 w-full"
               />
             </div>
             <div>
@@ -56,15 +71,7 @@ export function ItemLoanForm() {
                 id="quantity"
                 type="number"
                 placeholder="Kuantitas item"
-                className="bg-Input-A mt-1 text-Text-D rounded-[30px] px-4 w-full"
-              />
-            </div>
-            <div>
-              <Input
-                id="duration"
-                type="number"
-                placeholder="Durasi peminjaman (hari)"
-                className="bg-Input-A mt-1 text-Text-D rounded-[30px] px-4 w-full"
+                className="bg-Input-A mt-1 text-black rounded-[30px] px-4 w-full"
               />
             </div>
             <div className="flex items-center justify-center sm:justify-start gap-2">
@@ -74,7 +81,7 @@ export function ItemLoanForm() {
             </div>
           </div>
           <div className="flex items-center justify-center bg-white/10 rounded-[30px] overflow-hidden mb-4 sm:mb-0 h-[200px] sm:h-[300px]">
-            {selectedItem?.image ? (
+            {selectedItem.image ? (
               <div className="relative w-full h-full">
                 <Image
                   src={selectedItem.image}

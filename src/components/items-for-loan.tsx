@@ -1,4 +1,4 @@
-// import { PencilIcon, TrashIcon } from 'lucide-react'
+import { PencilIcon} from 'lucide-react'
 import Image from "next/image"
 import { useRouter } from 'next/navigation';
 
@@ -31,7 +31,7 @@ export function InventoryTable({ items }: InventoryTableProps) {
             <TableHead className="text-Text-A min-w-[120px]">Condition</TableHead>
             <TableHead className="text-Text-A min-w-[100px]">Status</TableHead>
             <TableHead className="text-Text-A min-w-[120px]">Payment Method</TableHead>
-            {/* <TableHead className="text-Text-A min-w-[100px]">Action</TableHead> */}
+            <TableHead className="text-Text-A min-w-[100px]">Action</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -64,7 +64,7 @@ export function InventoryTable({ items }: InventoryTableProps) {
                 </span>
               </TableCell>
               <TableCell className="text-Text-A">{item.paymentMethod}</TableCell>
-              {/* <TableCell>
+              <TableCell>
                 <div className="flex items-center gap-2">
                   <Button 
                     size="icon" 
@@ -86,11 +86,8 @@ export function InventoryTable({ items }: InventoryTableProps) {
                   >
                     <PencilIcon className="h-4 w-4" />
                   </Button>
-                  <Button size="icon" variant="ghost" className="h-8 w-8 text-Text-A">
-                    <TrashIcon className="h-4 w-4" />
-                  </Button>
                 </div>
-              </TableCell> */}
+              </TableCell>
             </TableRow>
           ))}
         </TableBody>
