@@ -4,7 +4,6 @@ import { InventoryTable } from '@/components/inventory-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { InventoryItem } from '@/types/inventory';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
@@ -130,7 +129,7 @@ export default function InventoryPage() {
 
   const handleEntriesChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setEntriesPerPage(Number(e.target.value));
-    setCurrentPage(1); // Reset to first page when changing entries per page
+    setCurrentPage(1);
   };
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -152,7 +151,7 @@ export default function InventoryPage() {
 
   return (
     <div className="space-y-8 w-full min-h-screen bg-Background-A p-4 md:p-8">
-      <h1 className="text-xl md:text-2xl font-bold text-Text-A mb-4 md:mb-6">
+      <h1 className="text-xl md:text-2xl font-bold text-Text-A mb-4 md:mb-6 text-center">
         Table of Inventory
       </h1>
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
@@ -175,7 +174,7 @@ export default function InventoryPage() {
             placeholder="Search..."
             className="bg-white/10 text-Text-A text-sm md:text-base w-full md:w-auto"
           />
-          <Button asChild className="w-full md:w-auto">
+          <Button asChild className="w-full md:w-auto text-Text-A bg-Secondary-A hover:bg-Secondary-A/80">
             <Link href="/admin/inventory/add">+ Add New Item</Link>
           </Button>
         </div>

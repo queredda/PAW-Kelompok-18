@@ -1,22 +1,38 @@
 import { NavbarProps } from '@/types/inventory';
 
-export const navbar_list: NavbarProps[] = [
+// Public routes (when not logged in)
+export const publicNavItems: NavbarProps[] = [
   {
-    menu: "Dashboard",
-    path: "/admin",
+    menu: 'Dashboard',
+    path: '/',
   },
   {
-    menu: "Inventory",
-    path: "/admin/inventory",
+    menu: 'About',
+    path: '/about',
   },
-  {
-    menu: "Borrowed",
-    path: "/admin/borrowed",
-  },
-  {
-    menu: "Account",
-    path: "/admin/account",
-  }
 ];
+
+// Protected routes (when logged in)
+export const protectedNavItems = (role: string): NavbarProps[] => {
+  const basePath = `/${role}`;
+  return [
+    {
+      menu: 'Dashboard',
+      path: `${basePath}/`,
+    },
+    {
+      menu: 'Inventory',
+      path: `${basePath}/inventory`,
+    },
+    {
+      menu: 'Borrowed',
+      path: `${basePath}/borrowed`,
+    },
+    {
+      menu: 'Account',
+      path: `/account`,
+    },
+  ];
+};
 
 export type { NavbarProps };

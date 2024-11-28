@@ -8,18 +8,24 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RiMenu4Fill } from 'react-icons/ri';
 import { HiX } from 'react-icons/hi';
 import { IoSettingsOutline } from 'react-icons/io5';
-import { navbar_list, NavbarProps } from '@/metadata/navbar_list';
+import { publicNavItems, protectedNavItems, NavbarProps } from '@/metadata/navbar_list';
 import { Button } from '../ui/button';
 import Image from 'next/image';
+import { useSession, signIn, signOut } from "next-auth/react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import Logo from '/public/logo/Logo.svg';
+import Logo from '/public/logo/LogoWhite.svg';
 
 const Navbar: React.FC = () => {
+  const { data: session, status } = useSession();
+  const isAuthenticated = status === "authenticated";
+  const role = session?.user?.role || '';
+  const navItems = isAuthenticated ? protectedNavItems(role) : publicNavItems;
+
   const screenType = useScreenType();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
@@ -140,7 +146,7 @@ const Navbar: React.FC = () => {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="flex-grow flex justify-center items-center gap-x-8"
             >
-              {navbar_list.map((item: NavbarProps, index: number) => (
+              {navItems.map((item: NavbarProps, index: number) => (
                 <button
                   key={index}
                   className={twMerge(
@@ -176,9 +182,20 @@ const Navbar: React.FC = () => {
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="font-pop">
-                  <DropdownMenuItem onClick={() => handleNavigation('/login')}>
-                    Login
-                  </DropdownMenuItem>
+                  {session && session.user ? (
+                    <>
+                      <DropdownMenuItem className="text-sky-600">
+                        {session.user.name}
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => signOut()} className="text-red-600">
+                        Sign Out
+                      </DropdownMenuItem>
+                    </>
+                  ) : (
+                    <DropdownMenuItem onClick={() => signIn()} className="text-green-600">
+                      Sign In
+                    </DropdownMenuItem>
+                  )}
                 </DropdownMenuContent>
               </DropdownMenu>
             ) : (
@@ -240,7 +257,7 @@ const Navbar: React.FC = () => {
                   <HiX className="w-6 h-6 text-Text-A" />
                 </button>
 
-                {navbar_list.map((item: NavbarProps, index: number) => (
+                {navItems.map((item: NavbarProps, index: number) => (
                   <motion.button
                     key={index}
                     className="w-full py-3 text-left px-4 text-Text-A font-pop font-medium gap-x-2 text-[16px]"
@@ -253,15 +270,32 @@ const Navbar: React.FC = () => {
                   </motion.button>
                 ))}
 
-                <motion.button
-                  className="w-full py-3 text-left px-4 text-Text-A font-pop font-medium text-[16px]"
-                  onClick={() => {
-                    handleNavigation('/logout');
-                    setIsMobileMenuOpen(false);
-                  }}
-                >
-                  Logout
-                </motion.button>
+                {session && session.user ? (
+                  <>
+                    <motion.div className="w-full py-3 text-left px-4 text-sky-600 font-pop font-medium text-[16px]">
+                      {session.user.name}
+                    </motion.div>
+                    <motion.button
+                      className="w-full py-3 text-left px-4 text-red-600 font-pop font-medium text-[16px]"
+                      onClick={() => {
+                        signOut();
+                        setIsMobileMenuOpen(false);
+                      }}
+                    >
+                      Sign Out
+                    </motion.button>
+                  </>
+                ) : (
+                  <motion.button
+                    className="w-full py-3 text-left px-4 text-green-600 font-pop font-medium text-[16px]"
+                    onClick={() => {
+                      signIn();
+                      setIsMobileMenuOpen(false);
+                    }}
+                  >
+                    Sign In
+                  </motion.button>
+                )}
               </div>
             </motion.div>
           </>

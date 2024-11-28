@@ -1,8 +1,8 @@
 'use client';
 
-import { PencilIcon, TrashIcon } from 'lucide-react';
+import { PencilIcon } from 'lucide-react';
 import Image from 'next/image';
-
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -13,13 +13,29 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import type { BorrowedItem } from '@/types/inventory';
 
 interface BorrowedItemsTableProps {
   items: BorrowedItem[];
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
 }
 
-export function BorrowedItemsTable({ items }: BorrowedItemsTableProps) {
+export function BorrowedItemsTable({ items, currentPage, totalPages, onPageChange }: BorrowedItemsTableProps) {
+  if (!items || items.length === 0) {
+    return <div className="text-Text-A font-pop">No items to display</div>;
+  }
+
   const renderTableContent = (status: string) => (
     <div className="rounded-md border border-white/10 bg-white/5">
       <Table>
@@ -29,10 +45,10 @@ export function BorrowedItemsTable({ items }: BorrowedItemsTableProps) {
             <TableHead className="text-Text-A font-pop">Product</TableHead>
             <TableHead className="text-Text-A font-pop">Customer</TableHead>
             <TableHead className="text-Text-A font-pop">Date</TableHead>
-            <TableHead className="text-Text-A font-pop">Amount</TableHead>
-            <TableHead className="text-Text-A font-pop">Payment Mode</TableHead>
             <TableHead className="text-Text-A font-pop">Status</TableHead>
-            <TableHead className="text-Text-A font-pop">Action</TableHead>
+            {status !== 'Delivered' && (
+              <TableHead className="text-Text-A font-pop">Action</TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -63,12 +79,6 @@ export function BorrowedItemsTable({ items }: BorrowedItemsTableProps) {
                 <TableCell className="text-Text-A font-pop">
                   {item.date}
                 </TableCell>
-                <TableCell className="text-Text-A font-pop">
-                  ${item.amount.toFixed(2)}
-                </TableCell>
-                <TableCell className="text-Text-A font-pop">
-                  {item.paymentMode}
-                </TableCell>
                 <TableCell>
                   <span
                     className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold font-pop ${
@@ -80,24 +90,64 @@ export function BorrowedItemsTable({ items }: BorrowedItemsTableProps) {
                     {item.status}
                   </span>
                 </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-Text-A"
-                    >
-                      <PencilIcon className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-8 w-8 text-Text-A"
-                    >
-                      <TrashIcon className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
+                {status !== 'Delivered' && (
+                  <TableCell>
+                    <Dialog>
+                      <DialogTrigger asChild>
+                        <Button
+                          size="icon"
+                          variant="ghost"
+                          className="h-8 w-8 text-Text-A hover:bg-Secondary-A/20"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="bg-Background-A border-white/10">
+                        <DialogHeader>
+                          <DialogTitle className="text-Text-A text-[16px] font-pop">
+                            {status === 'Returned' ? 'Terima Pengembalian Barang, bagaimana kondisinya?' : 'Terima Permintaan Peminjaman?'}
+                          </DialogTitle>
+                          <DialogDescription className="text-Text-A/80 font-pop text-[14px]">
+                            {status === 'Returned' ? 'Pilih kondisi barang yang dikembalikan' : 'Peminjam akan menerima status barang disetujui untuk dipinjam'}
+                          </DialogDescription>
+                        </DialogHeader>
+                        <DialogFooter className="flex gap-2">
+                          {status === 'Returned' ? (
+                            <>
+                              <Button
+                                variant="ghost"
+                                className="bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-Text-A font-pop"
+                              >
+                                Baik
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                className="bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-Text-A font-pop"
+                              >
+                                Rusak
+                              </Button>
+                            </>
+                          ) : (
+                            <>
+                              <Button
+                                variant="ghost"
+                                className="bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-Text-A font-pop"
+                              >
+                                Accept Request
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                className="bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-Text-A font-pop"
+                              >
+                                Reject Request
+                              </Button>
+                            </>
+                          )}
+                        </DialogFooter>
+                      </DialogContent>
+                    </Dialog>
+                  </TableCell>
+                )}
               </TableRow>
             ))}
         </TableBody>
@@ -142,6 +192,37 @@ export function BorrowedItemsTable({ items }: BorrowedItemsTableProps) {
       <TabsContent value="to-return" className="mt-2 md:mt-4">
         {renderTableContent('Returned')}
       </TabsContent>
+
+      <div className="flex justify-center gap-2 flex-wrap mt-4">
+        <Button 
+          variant="ghost" 
+          className="text-Text-A hover:bg-Secondary-A hover:text-Text-A"
+          onClick={() => onPageChange(currentPage - 1)}
+          disabled={currentPage === 1}
+        > 
+          <ChevronLeft />
+        </Button>
+        {[...Array(totalPages)].map((_, index) => (
+          <Button
+            key={index + 1}
+            variant="default"
+            className={`text-sm md:text-base ${
+              currentPage === index + 1 ? 'bg-Secondary-A text-Text-A hover:bg-Secondary-A/80' : 'text-Text-A'
+            } text-Text-A`}
+            onClick={() => onPageChange(index + 1)}
+          >
+            {index + 1}
+          </Button>
+        ))}
+        <Button 
+          variant="ghost" 
+          className="text-Text-A hover:bg-Secondary-A hover:text-Text-A"
+          onClick={() => onPageChange(currentPage + 1)}
+          disabled={currentPage === totalPages}
+        >
+          <ChevronRight />
+        </Button>
+      </div>
     </Tabs>
   );
 }

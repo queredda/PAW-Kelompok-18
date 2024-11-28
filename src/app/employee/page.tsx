@@ -9,36 +9,6 @@ import type { InventoryItem } from "@/types/inventory"
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRouter } from 'next/navigation'
 
-// const mockItems: InventoryItem[] = [
-//   {
-//     id: "#20462",
-//     name: "Hat",
-//     category: "Accessories", 
-//     location: "Warehouse A",
-//     quantity: 5,
-//     image: "/placeholder.svg",
-//     status: "Available",
-//   },
-//   {
-//     id: "#20463",
-//     name: "Laptop",
-//     category: "Electronics",
-//     location: "Warehouse B", 
-//     quantity: 10,
-//     image: "/placeholder.svg",
-//     status: "Borrowed",
-//   },
-//   {
-//     id: "#32322",
-//     name: "Kentang",
-//     category: "Electronics",
-//     location: "Warehouse B",
-//     quantity: 10,
-//     image: "/placeholder.svg", 
-//     status: "Borrowed",
-//   },
-// ]
-
 export default function InventoryPage() {
   const router = useRouter();
   const [items, setItems] = useState<InventoryItem[]>([]);
