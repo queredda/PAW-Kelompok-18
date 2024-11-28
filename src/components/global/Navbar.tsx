@@ -20,16 +20,60 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Logo from '/public/logo/LogoWhite.svg';
 
+const parseJwt = (token: string) => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      window.atob(base64).split('').map(function(c) {
+        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+      }).join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Error parsing JWT:', error);
+    return null;
+  }
+};
+
 const Navbar: React.FC = () => {
   const { data: session, status } = useSession();
-  const isAuthenticated = status === "authenticated";
-  const role = session?.user?.role || '';
-  const navItems = isAuthenticated ? protectedNavItems(role) : publicNavItems;
+  const router = useRouter();
+  const [userRole, setUserRole] = useState<string>('');
+  
+  const navItems = session ? protectedNavItems(userRole) : publicNavItems;
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = parseJwt(token);
+        if (decoded) {
+          setUserRole(decoded.role);
+          if (!session && status !== "loading") {
+            signIn('credentials', {
+              token,
+              redirect: false
+            });
+          }
+        }
+      } catch (error) {
+        console.error('Invalid token:', error);
+        localStorage.removeItem('token');
+      }
+    }
+  }, [session, status]);
+
+  const handleSignOut = async () => {
+    localStorage.removeItem('token');
+    setUserRole('');
+    await signOut({ redirect: false });
+    router.push('/login');
+  };
 
   const screenType = useScreenType();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
-  const router = useRouter();
   const pathname = usePathname();
 
   const menuVariants = {
@@ -187,12 +231,12 @@ const Navbar: React.FC = () => {
                       <DropdownMenuItem className="text-sky-600">
                         {session.user.name}
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={() => signOut()} className="text-red-600">
+                      <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
                         Sign Out
                       </DropdownMenuItem>
                     </>
                   ) : (
-                    <DropdownMenuItem onClick={() => signIn()} className="text-green-600">
+                    <DropdownMenuItem onClick={() => router.push('/login')} className="text-green-600">
                       Sign In
                     </DropdownMenuItem>
                   )}
@@ -277,10 +321,7 @@ const Navbar: React.FC = () => {
                     </motion.div>
                     <motion.button
                       className="w-full py-3 text-left px-4 text-red-600 font-pop font-medium text-[16px]"
-                      onClick={() => {
-                        signOut();
-                        setIsMobileMenuOpen(false);
-                      }}
+                      onClick={handleSignOut}
                     >
                       Sign Out
                     </motion.button>
@@ -289,7 +330,7 @@ const Navbar: React.FC = () => {
                   <motion.button
                     className="w-full py-3 text-left px-4 text-green-600 font-pop font-medium text-[16px]"
                     onClick={() => {
-                      signIn();
+                      router.push('/login');
                       setIsMobileMenuOpen(false);
                     }}
                   >

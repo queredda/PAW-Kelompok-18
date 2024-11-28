@@ -92,20 +92,10 @@ const LoginPage = (): JSX.Element => {
         localStorage.setItem('token', token);
         document.cookie = `token=${token}; path=/; max-age=86400; secure; samesite=strict`;
 
-        const profileResponse = await axios.get(
-          `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/profile`,
-          {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            withCredentials: true,
-          }
-        );
-
-        if (profileResponse.data.role === 'user') {
-          router.push('/employee/');
-        } else if (profileResponse.data.role === 'admin') {
-          router.push('/navigation/');
+        if (decoded.role === 'user') {
+          router.push('/employee');
+        } else if (decoded.role === 'admin') {
+          router.push('/admin');
         }
       }
     } catch (err) {
