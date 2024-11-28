@@ -7,7 +7,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import axios from 'axios';
-import { jwtDecode } from 'jwt-decode';
+
+// Add the JWT parsing function
+const parseJwt = (token: string) => {
+  const base64Url = token.split('.')[1];
+  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  const jsonPayload = decodeURIComponent(
+    window.atob(base64).split('').map(function(c) {
+      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+    }).join('')
+  );
+  return JSON.parse(jsonPayload);
+};
 
 const LoginPage = (): JSX.Element => {
   const router = useRouter();
@@ -16,12 +27,13 @@ const LoginPage = (): JSX.Element => {
   const [isLoading, setIsLoading] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+
   useEffect(() => {
     const checkLoginStatus = async () => {
       const token = localStorage.getItem('token');
       if (token) {
         try {
-          const decoded = jwtDecode<{ role: string; email: string }>(token);
+          const decoded = parseJwt(token);
           console.log('Decoded token (checkLoginStatus):', decoded);
           setIsLoggedIn(true);
 
@@ -74,7 +86,7 @@ const LoginPage = (): JSX.Element => {
 
       if (response.data.token) {
         const token = response.data.token;
-        const decoded = jwtDecode<{ role: string; email: string }>(token);
+        const decoded = parseJwt(token);
         console.log('Decoded token (handleSubmit):', decoded);
 
         localStorage.setItem('token', token);
