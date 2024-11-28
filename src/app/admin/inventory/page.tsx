@@ -4,9 +4,18 @@ import { InventoryTable } from '@/components/inventory-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import type { InventoryItem } from '@/types/inventory';
 import Link from 'next/link';
 import { useState } from 'react';
+
+type InventoryItem = {
+  id: string;
+  name: string;
+  category: string;
+  location: string;
+  quantity: number;
+  image: string;
+  status: string;
+};
 
 const mockItems: InventoryItem[] = [
   {
