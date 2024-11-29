@@ -6,6 +6,9 @@ import dynamic from 'next/dynamic';
 import Providers from '../components/providers';
 import { Toaster } from '@/components/ui/toaster';
 import { SessionProvider } from 'next-auth/react';
+import { useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 
 const Navbar = dynamic(() => import('@/components/global/Navbar'), {
   ssr: false,
@@ -19,6 +22,15 @@ interface RootLayoutProps {
 }
 
 const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'unauthenticated' && window.location.pathname !== '/login') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
   return (
     <html lang="en">
       <body className={`${poppins.variable}`}>

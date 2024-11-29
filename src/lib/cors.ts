@@ -4,7 +4,9 @@ import type { NextRequest } from 'next/server';
 const allowedOrigins = [
   'http://localhost:3000',
   'https://boxsystem.site',
+  'https://www.boxsystem.site',
   'boxsystem.site',
+  'www.boxsystem.site'
 ];
 
 export function cors(req: NextRequest) {

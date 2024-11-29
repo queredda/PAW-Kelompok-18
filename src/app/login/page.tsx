@@ -80,11 +80,8 @@ const LoginPage = () => {
         // Get the callback URL from the URL parameters
         const params = new URLSearchParams(window.location.search);
         const callbackUrl = params.get('callbackUrl') || '/';
-        
-        setTimeout(() => {
-          router.refresh();
-          window.location.href = callbackUrl;
-        }, 1000);
+        // Use router.push instead of window.location
+        router.push(callbackUrl);
       }
     } catch (error) {
       console.error('Login error:', error);
