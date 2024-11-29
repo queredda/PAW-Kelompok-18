@@ -2,6 +2,7 @@ import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { AuthController } from '@/controllers/auth';
 import connectDB from '@/lib/db';
+import bcrypt from 'bcryptjs';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -17,10 +18,17 @@ export const authOptions: NextAuthOptions = {
         try {
           await connectDB();
 
-          const user = await AuthController.loginWithEmail({
-            email: credentials.email,
-            password: credentials.password,
-          });
+          const user = await AuthController.findUserByEmail(credentials.email);
+          
+          if (!user) {
+            return null;
+          }
+
+          const isValidPassword = await bcrypt.compare(credentials.password, user.password);
+
+          if (!isValidPassword) {
+            return null;
+          }
 
           return {
             id: user._id.toString(),

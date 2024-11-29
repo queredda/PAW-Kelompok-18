@@ -1,16 +1,13 @@
 import { User, UserModel } from '@/models/User';
 import createHttpError from 'http-errors';
 import { DocumentType } from '@typegoose/typegoose';
+import bcrypt from 'bcryptjs';
 
 export class AuthController {
-  public static async loginWithEmail(data: {
-    email: string;
-    password: string;
-  }): Promise<DocumentType<User>> {
+  public static async findUserByEmail(email: string): Promise<DocumentType<User>> {
     try {
-      const { email, password } = data;
-      if (!email || !password) {
-        throw createHttpError(400, 'Email and password are required');
+      if (!email) {
+        throw createHttpError(400, 'Email is required');
       }
 
       const user = await UserModel.findOne({ email });
@@ -19,13 +16,9 @@ export class AuthController {
         throw createHttpError(404, 'User not found');
       }
 
-      if (user.password !== password) {
-        throw createHttpError(401, 'Invalid password');
-      }
-
       return user;
     } catch (error) {
-      console.error('Login error:', error);
+      console.error('Find user error:', error);
       throw error;
     }
   }
@@ -49,12 +42,15 @@ export class AuthController {
         throw createHttpError(409, 'User already exists');
       }
 
-      // Create new user with explicit role
+      // Hash the password before saving
+      const hashedPassword = await bcrypt.hash(password, 10);
+
+      // Create new user with explicit role and hashed password
       const user = new UserModel({
         name,
         email,
-        password,
-        role: role || 'user', // Set role explicitly, default to 'user' if not provided
+        password: hashedPassword, // Store the hashed password
+        role: role || 'user',
       });
 
       await user.save();

@@ -1,35 +1,49 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import * as z from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useToast } from "@/hooks/use-toast";
 import { signIn } from 'next-auth/react';
-import { useSession } from 'next-auth/react';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from "@/components/ui/form";
+
+const formSchema = z.object({
+  email: z.string().email("Email harus diisi dengan benar"),
+  password: z.string().min(1, "Password harus diisi"),
+});
 
 const LoginPage = () => {
   const router = useRouter();
   const { toast } = useToast();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const { data: session } = useSession();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      setIsLoading(true);
-
-      // First, check if the email exists using the correct API endpoint
+      // First, check if the email exists
       const checkEmailResponse = await fetch('/api/auth/check-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: values.email }),
       });
 
       if (!checkEmailResponse.ok) {
@@ -43,36 +57,34 @@ const LoginPage = () => {
           variant: "destructive",
           description: "No account found with this email",
         });
-        setIsLoading(false);
         return;
       }
 
       // If email exists, proceed with login
-      const result = await signIn('credentials', {
-        email,
-        password,
+      const signInData = await signIn('credentials', {
+        email: values.email,
+        password: values.password,
         redirect: false,
       });
 
-      if (result?.error) {
+      if (signInData?.error) {
         toast({
           variant: "destructive",
           description: "Invalid password",
         });
-        return;
-      }
-
-      if (result?.ok) {
+      } else {
         toast({
           description: "Successfully logged in",
         });
-
+        
         // Get the callback URL from the URL parameters
         const params = new URLSearchParams(window.location.search);
-        const callbackUrl = params.get('callbackUrl') || 
-          (session?.user?.role === 'admin' ? '/admin' : '/employee');
+        const callbackUrl = params.get('callbackUrl') || '/';
         
-        window.location.href = callbackUrl;
+        setTimeout(() => {
+          router.refresh();
+          window.location.href = callbackUrl;
+        }, 1000);
       }
     } catch (error) {
       console.error('Login error:', error);
@@ -80,8 +92,6 @@ const LoginPage = () => {
         variant: "destructive",
         description: "An error occurred during login",
       });
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -110,31 +120,51 @@ const LoginPage = () => {
                 </CardTitle>
               </CardHeader>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <Input
-                  type="email"
-                  placeholder="Email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="bg-Input-A text-gray-700 rounded-full border-0 placeholder:text-gray-500"
-                  required
-                />
-                <Input
-                  type="password"
-                  placeholder="Password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-Input-A text-gray-700 rounded-full border-0 placeholder:text-gray-500"
-                  required
-                />
-                <Button
-                  type="submit"
-                  className="w-full bg-[#413D79] text-white hover:bg-[#4C51BF] rounded-full border-0"
-                  disabled={isLoading}
-                >
-                  {isLoading ? 'Loading...' : 'Login'}
-                </Button>
-              </form>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                  <FormField
+                    control={form.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="email"
+                            placeholder="Email"
+                            className="bg-Input-A text-gray-700 rounded-full border-0 placeholder:text-gray-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="password"
+                            placeholder="Password"
+                            className="bg-Input-A text-gray-700 rounded-full border-0 placeholder:text-gray-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className="w-full bg-[#413D79] text-white hover:bg-[#4C51BF] rounded-full border-0"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    {form.formState.isSubmitting ? 'Loading...' : 'Login'}
+                  </Button>
+                </form>
+              </Form>
 
               <div className="text-sm text-center lg:text-left">
                 Belum punya akun?{' '}
