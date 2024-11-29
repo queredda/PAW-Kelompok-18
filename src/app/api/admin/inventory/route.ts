@@ -5,8 +5,16 @@ import { getToken } from 'next-auth/jwt';
 import { SaveOneFileToDrive } from '@/lib/google-drive';
 import { RequestStatus } from '@/models/LoanRequest';
 
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const token = await getToken({ req });
+    if (!token?.sub || token.role !== 'admin') {
+      return NextResponse.json(
+        { message: 'Unauthorized - Admin access required' },
+        { status: 401 }
+      );
+    }
+    
     await connectDB();
     const { InventoryModel, LoanRequestModel } = getModels();
 

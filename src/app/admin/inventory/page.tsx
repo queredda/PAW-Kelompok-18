@@ -1,5 +1,6 @@
 'use client';
 
+import ProtectedRoute from '@/components/auth/protected-route';
 import { InventoryTable } from '@/components/inventory-table';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -93,86 +94,88 @@ export default function InventoryPage() {
   }
 
   return (
-    <div className="space-y-8 w-full min-h-screen bg-Background-A p-4 md:p-8">
-      <h1 className="text-xl md:text-2xl font-bold text-Text-A mb-4 md:mb-6 text-center">
-        Table of Inventory
-      </h1>
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-Text-A text-sm md:text-base">Show</span>
-          <select
-            className="bg-white/10 text-Text-A border border-white/20 rounded-md text-sm md:text-base px-2 py-1"
-            value={entriesPerPage}
-            onChange={handleEntriesChange}
-          >
-            <option value={3}>3</option>
-            <option value={5}>5</option>
-            <option value={10}>10</option>
-          </select>
-          <span className="text-Text-A text-sm md:text-base">entries</span>
+    <ProtectedRoute requireAdmin>
+      <div className="space-y-8 w-full min-h-screen bg-Background-A p-4 md:p-8">
+        <h1 className="text-xl md:text-2xl font-bold text-Text-A mb-4 md:mb-6 text-center">
+          Table of Inventory
+        </h1>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-Text-A text-sm md:text-base">Show</span>
+            <select
+              className="bg-white/10 text-Text-A border border-white/20 rounded-md text-sm md:text-base px-2 py-1"
+              value={entriesPerPage}
+              onChange={handleEntriesChange}
+            >
+              <option value={3}>3</option>
+              <option value={5}>5</option>
+              <option value={10}>10</option>
+            </select>
+            <span className="text-Text-A text-sm md:text-base">entries</span>
+          </div>
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto">
+            <Input
+              type="search"
+              placeholder="Search..."
+              className="bg-white/10 text-Text-A text-sm md:text-base w-full md:w-auto"
+              value={searchTerm}
+              onChange={handleSearch}
+            />
+            <Button
+              asChild
+              className="w-full md:w-auto text-Text-A bg-Secondary-A hover:bg-Secondary-A/80"
+            >
+              <Link href="/admin/inventory/add">+ Add New Item</Link>
+            </Button>
+          </div>
         </div>
-        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-2 w-full md:w-auto">
-          <Input
-            type="search"
-            placeholder="Search..."
-            className="bg-white/10 text-Text-A text-sm md:text-base w-full md:w-auto"
-            value={searchTerm}
-            onChange={handleSearch}
-          />
+        <div className="overflow-x-auto">
+          {error || items.length === 0 ? (
+            <div className="h-[50vh] flex items-center justify-center">
+              <p className="text-Text-A text-xl">
+                {error || 'No available item'}
+              </p>
+            </div>
+          ) : (
+            <InventoryTable items={paginatedItems} />
+          )}
+        </div>
+        <div className="flex justify-center gap-2 flex-wrap">
           <Button
-            asChild
-            className="w-full md:w-auto text-Text-A bg-Secondary-A hover:bg-Secondary-A/80"
+            variant="ghost"
+            className="text-Text-A hover:bg-Secondary-A hover:text-Text-A"
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
           >
-            <Link href="/admin/inventory/add">+ Add New Item</Link>
+            <ChevronLeft />
+          </Button>
+          {Array.from({ length: totalPages }).map((_, index) => {
+            const pageNumber = index + 1;
+            return (
+              <Button
+                key={`page-${pageNumber}`}
+                variant="default"
+                className={`text-sm md:text-base ${
+                  currentPage === pageNumber
+                    ? 'bg-Secondary-A text-Text-A hover:bg-Secondary-A/80'
+                    : 'text-Text-A'
+                } text-Text-A`}
+                onClick={() => handlePageChange(pageNumber)}
+              >
+                {pageNumber}
+              </Button>
+            );
+          })}
+          <Button
+            variant="ghost"
+            className="text-Text-A hover:bg-Secondary-A hover:text-Text-A"
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+          >
+            <ChevronRight />
           </Button>
         </div>
       </div>
-      <div className="overflow-x-auto">
-        {error || items.length === 0 ? (
-          <div className="h-[50vh] flex items-center justify-center">
-            <p className="text-Text-A text-xl">
-              {error || 'No available item'}
-            </p>
-          </div>
-        ) : (
-          <InventoryTable items={paginatedItems} />
-        )}
-      </div>
-      <div className="flex justify-center gap-2 flex-wrap">
-        <Button
-          variant="ghost"
-          className="text-Text-A hover:bg-Secondary-A hover:text-Text-A"
-          onClick={() => handlePageChange(currentPage - 1)}
-          disabled={currentPage === 1}
-        >
-          <ChevronLeft />
-        </Button>
-        {Array.from({ length: totalPages }).map((_, index) => {
-          const pageNumber = index + 1;
-          return (
-            <Button
-              key={`page-${pageNumber}`}
-              variant="default"
-              className={`text-sm md:text-base ${
-                currentPage === pageNumber
-                  ? 'bg-Secondary-A text-Text-A hover:bg-Secondary-A/80'
-                  : 'text-Text-A'
-              } text-Text-A`}
-              onClick={() => handlePageChange(pageNumber)}
-            >
-              {pageNumber}
-            </Button>
-          );
-        })}
-        <Button
-          variant="ghost"
-          className="text-Text-A hover:bg-Secondary-A hover:text-Text-A"
-          onClick={() => handlePageChange(currentPage + 1)}
-          disabled={currentPage === totalPages}
-        >
-          <ChevronRight />
-        </Button>
-      </div>
-    </div>
+    </ProtectedRoute>
   );
 }
