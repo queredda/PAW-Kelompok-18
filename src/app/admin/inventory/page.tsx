@@ -9,7 +9,6 @@ import React, { useState, useEffect } from 'react';
 import { api } from '@/lib/api';
 import { InventoryItem } from '@/types/inventory';
 import { Skeleton } from '@/components/ui/skeleton';
-import { AxiosError } from 'axios';
 
 export default function InventoryPage() {
   const [items, setItems] = useState<InventoryItem[]>([]);
@@ -26,11 +25,10 @@ export default function InventoryPage() {
         const response = await api.get('/admin/inventory');
         console.log('Inventory response:', response.data);
         setItems(response.data);
-      } catch (err) {
-        console.error('Fetch inventory error details:', err);
-        const axiosError = err as AxiosError<{ message: string }>;
+      } catch (err: Error | unknown) {
+        const error = err as Error;
         setError(
-          axiosError.response?.data?.message || 'Failed to fetch inventory data.'
+          'message' in error ? error.message : 'Failed to fetch inventory data.'
         );
       } finally {
         setLoading(false);
