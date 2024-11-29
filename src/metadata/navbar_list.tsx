@@ -1,38 +1,28 @@
 import { NavbarProps } from '@/types/inventory';
 
-// Public routes (when not logged in)
-export const publicNavItems: NavbarProps[] = [
-  {
-    menu: 'Dashboard',
-    path: '/',
-  },
-  {
-    menu: 'About',
-    path: '/about',
-  },
-];
+export type { NavbarProps };
 
-// Protected routes (when logged in)
-export const protectedNavItems = (role: string): NavbarProps[] => {
-  const basePath = `/${role}`;
-  return [
-    {
-      menu: 'Dashboard',
-      path: `${basePath}/`,
-    },
-    {
-      menu: 'Inventory',
-      path: `${basePath}/inventory`,
-    },
-    {
-      menu: 'Borrowed',
-      path: `${basePath}/borrowed`,
-    },
-    {
-      menu: 'Account',
-      path: `/account`,
-    },
-  ];
+export const protectedNavItems = (role: string): NavbarProps[] => {  
+  if (role === 'admin') {
+    return [
+      { menu: 'Dashboard', path: '/admin' },
+      { menu: 'Inventory', path: '/admin/inventory' },
+      { menu: 'Borrowed', path: '/admin/borrowed' },
+      { menu: 'Account', path: '/account' },
+    ];
+  } else if (role === 'user') {
+    return [
+      { menu: 'Dashboard', path: '/employee' },
+      { menu: 'Loan', path: '/employee/loan' },
+      { menu: 'Account', path: '/account' },
+    ];
+  }
+  
+  console.log('No matching role found, returning empty array');
+  return [];
 };
 
-export type { NavbarProps };
+export const publicNavItems: NavbarProps[] = [
+  { menu: 'Home', path: '/' },
+  { menu: 'About', path: '/about' },
+];

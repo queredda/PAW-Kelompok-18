@@ -12,8 +12,9 @@ export default function AccountTypeSelection() {
   const { data: session, status } = useSession();
 
   useEffect(() => {
-    if (session?.accessToken) {
-      console.log('Role Page - JWT Token:', session.accessToken);
+    const token = session?.accessToken
+    if (token) {
+      console.log('Role Page - JWT Token:', token);
     }
   }, [session]);
 
@@ -22,7 +23,7 @@ export default function AccountTypeSelection() {
   }
 
   const patchRole = async (role: 'user' | 'admin') => {
-    if (status !== 'authenticated') {
+    if (status !== 'authenticated' || !session?.accessToken) {
       alert('You must be logged in to perform this action');
       router.push('/login');
       return;
@@ -35,7 +36,7 @@ export default function AccountTypeSelection() {
         {
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.accessToken}`
+            'Authorization': `Bearer ${session.accessToken}`
           },
           withCredentials: true
         }

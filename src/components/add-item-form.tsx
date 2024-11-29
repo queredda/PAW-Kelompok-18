@@ -6,8 +6,10 @@ import Image from 'next/image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
+import { useToast } from '@/hooks/use-toast';
 
 export function AddItemForm() {
+  const { toast } = useToast();
   const [formData, setFormData] = useState({
     name: '',
     totalKuantitas: '',
@@ -20,7 +22,7 @@ export function AddItemForm() {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData({
       ...formData,
-      [e.target.id]: e.target.value
+      [e.target.id]: e.target.value,
     });
   };
 
@@ -50,18 +52,19 @@ export function AddItemForm() {
       formDataToSend.append('name', formData.name);
       formDataToSend.append('totalKuantitas', formData.totalKuantitas);
       formDataToSend.append('kategori', formData.kategori);
-      
+
       if (imageFile) {
         formDataToSend.append('image', imageFile);
       }
 
-      const response = await fetch('https://api.boxsystem.site/admin/inventory', {
+      const response = await fetch('/api/admin/inventory', {
         method: 'POST',
         body: formDataToSend,
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create inventory item');
+        const error = await response.json();
+        throw new Error(error.message || 'Failed to create inventory item');
       }
 
       // Reset form after successful submission
@@ -73,10 +76,18 @@ export function AddItemForm() {
       setImage(null);
       setImageFile(null);
 
-      alert('Item berhasil ditambahkan!');
+      toast({
+        title: "Success",
+        description: "Item berhasil ditambahkan!",
+        variant: "default",
+      });
     } catch (error) {
       console.error('Error:', error);
-      alert('Gagal menambahkan item. Silakan coba lagi.');
+      toast({
+        title: "Error",
+        description: "Gagal menambahkan item. Silakan coba lagi.",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -132,7 +143,7 @@ export function AddItemForm() {
                 />
               </div>
               <div className="flex items-center justify-center sm:justify-start gap-2">
-                <Button 
+                <Button
                   type="submit"
                   disabled={isLoading}
                   className="w-full sm:w-auto px-[40px] bg-[#413D79] hover:bg-[#413D79]/80 rounded-[30px]"

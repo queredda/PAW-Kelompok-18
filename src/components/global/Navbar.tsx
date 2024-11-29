@@ -8,10 +8,14 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { RiMenu4Fill } from 'react-icons/ri';
 import { HiX } from 'react-icons/hi';
 import { IoSettingsOutline } from 'react-icons/io5';
-import { publicNavItems, protectedNavItems, NavbarProps } from '@/metadata/navbar_list';
+import {
+  publicNavItems,
+  protectedNavItems,
+  NavbarProps,
+} from '@/metadata/navbar_list';
 import { Button } from '../ui/button';
 import Image from 'next/image';
-import { useSession, signIn, signOut } from "next-auth/react";
+import { useSession, signOut } from 'next-auth/react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -20,61 +24,84 @@ import {
 } from '@/components/ui/dropdown-menu';
 import Logo from '/public/logo/LogoWhite.svg';
 
-const parseJwt = (token: string) => {
-  try {
-    const base64Url = token.split('.')[1];
-    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-    const jsonPayload = decodeURIComponent(
-      window.atob(base64).split('').map(function(c) {
-        return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-      }).join('')
-    );
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error('Error parsing JWT:', error);
-    return null;
-  }
-};
-
 const Navbar: React.FC = () => {
   const { data: session, status } = useSession();
   const router = useRouter();
-  const [userRole, setUserRole] = useState<string>('');
-  
-  const navItems = session ? protectedNavItems(userRole) : publicNavItems;
-
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = parseJwt(token);
-        if (decoded) {
-          setUserRole(decoded.role);
-          if (!session && status !== "loading") {
-            signIn('credentials', {
-              token,
-              redirect: false
-            });
-          }
-        }
-      } catch (error) {
-        console.error('Invalid token:', error);
-        localStorage.removeItem('token');
-      }
-    }
-  }, [session, status]);
-
-  const handleSignOut = async () => {
-    localStorage.removeItem('token');
-    setUserRole('');
-    await signOut({ redirect: false });
-    router.push('/login');
-  };
-
+  const pathname = usePathname();
   const screenType = useScreenType();
+  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
-  const pathname = usePathname();
+  const [currentNavItems, setCurrentNavItems] = useState<NavbarProps[]>(publicNavItems);
+
+  useEffect(() => {
+    console.log('Session status:', status);
+    console.log('Session data:', session);
+
+    if (status === 'authenticated' && session?.user?.role) {
+      const items = protectedNavItems(session.user.role);
+      console.log('Setting protected items:', items);
+      setCurrentNavItems(items);
+    } else {
+      console.log('Setting public items');
+      setCurrentNavItems(publicNavItems);
+    }
+  }, [session, session?.user?.role, status]);
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      const role = session?.user?.role;
+      if (role) {
+        setCurrentNavItems(protectedNavItems(role));
+      }
+    }
+  }, [session, session?.user?.role, status]);
+
+  const handleScroll = (): void => {
+    const scroll = window.scrollY;
+    setIsScrolled(scroll > 20);
+  };
+
+  useEffect(() => {
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+  }, [isMobileMenuOpen]);
+
+  if (status === 'loading') {
+    return null;
+  }
+
+  const handleSignOut = async () => {
+    try {
+      await signOut({
+        redirect: false,
+        callbackUrl: '/login'
+      });
+      
+      // Force reset the navigation items to public
+      setCurrentNavItems(publicNavItems);
+      
+      // Clear any cached session data
+      window.localStorage.removeItem('next-auth.session-token');
+      window.localStorage.removeItem('next-auth.callback-url');
+      window.localStorage.removeItem('next-auth.csrf-token');
+      
+      // Force a page reload to clear any remaining state
+      window.location.href = '/login';
+    } catch (error) {
+      console.error('Error during sign out:', error);
+      // Fallback: force reload even if there's an error
+      window.location.href = '/login';
+    }
+  };
 
   const menuVariants = {
     closed: {
@@ -112,29 +139,24 @@ const Navbar: React.FC = () => {
     },
   };
 
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
-    }
-  }, [isMobileMenuOpen]);
-
-  const handleScroll = (): void => {
-    const scroll = window.scrollY;
-    if (scroll > 20) {
-      setIsScrolled(true);
-    } else {
-      setIsScrolled(false);
-    }
-  };
-
-  useEffect(() => {
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
-
   const handleNavigation = (path: string): void => {
+    if (
+      (path.startsWith('/admin') || path.startsWith('/employee')) &&
+      !session
+    ) {
+      router.push('/login');
+      return;
+    }
+
+    if (session?.user?.role === 'admin' && path.startsWith('/employee')) {
+      router.push('/admin');
+      return;
+    }
+    if (session?.user?.role === 'user' && path.startsWith('/admin')) {
+      router.push('/employee');
+      return;
+    }
+
     router.push(path);
   };
 
@@ -147,12 +169,12 @@ const Navbar: React.FC = () => {
         className={twMerge(
           'w-screen backdrop-blur-lg',
           isScrolled
-            ? 'h-[60px] bg-Background-A/80 shadow-3xl '
+            ? 'h-[60px] bg-Background-A/80 shadow-3xl'
             : 'h-[70px] bg-Background-A',
           'fixed p-4 lg:px-8 z-10 duration-200'
         )}
       >
-        <div className="max-w-[1440px] mx-auto flex items-center justify-between h-full relative ">
+        <div className="max-w-[1440px] mx-auto flex items-center justify-between h-full relative">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
@@ -178,19 +200,21 @@ const Navbar: React.FC = () => {
                 >
                   Inventory Management System
                 </span>
-                <p className="text-sm text-Text-A">Solution for your business</p>
+                <p className="text-sm text-Text-A">
+                  Solution for your business
+                </p>
               </div>
             </button>
           </motion.div>
 
           {!screenType.isMobile && (
             <motion.div
-              initial={{ opacity: 0, y: -20 }}
-              animate={{ opacity: 1, y: 0 }}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="flex-grow flex justify-center items-center gap-x-8"
+              className="flex items-center"
             >
-              {navItems.map((item: NavbarProps, index: number) => (
+              {currentNavItems.map((item: NavbarProps, index: number) => (
                 <button
                   key={index}
                   className={twMerge(
@@ -231,12 +255,18 @@ const Navbar: React.FC = () => {
                       <DropdownMenuItem className="text-sky-600">
                         {session.user.name}
                       </DropdownMenuItem>
-                      <DropdownMenuItem onClick={handleSignOut} className="text-red-600">
+                      <DropdownMenuItem
+                        onClick={handleSignOut}
+                        className="text-red-600"
+                      >
                         Sign Out
                       </DropdownMenuItem>
                     </>
                   ) : (
-                    <DropdownMenuItem onClick={() => router.push('/login')} className="text-green-600">
+                    <DropdownMenuItem
+                      onClick={() => router.push('/login')}
+                      className="text-green-600"
+                    >
                       Sign In
                     </DropdownMenuItem>
                   )}
@@ -301,7 +331,7 @@ const Navbar: React.FC = () => {
                   <HiX className="w-6 h-6 text-Text-A" />
                 </button>
 
-                {navItems.map((item: NavbarProps, index: number) => (
+                {currentNavItems.map((item: NavbarProps, index: number) => (
                   <motion.button
                     key={index}
                     className="w-full py-3 text-left px-4 text-Text-A font-pop font-medium gap-x-2 text-[16px]"

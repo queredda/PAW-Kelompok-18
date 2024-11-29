@@ -14,16 +14,25 @@ export function StatsCards({ stats }: StatsCardsProps) {
           <CardTitle className="text-sm font-medium text-Text-A">Total Items</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-Text-A">{stats.totalItems}</div>
+          <div className="text-2xl font-bold text-Text-A">{stats.totalItem}</div>
         </CardContent>
       </Card>
 
       <Card className="bg-white/10 border-white/20">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-Text-A">Available Items</CardTitle>
+          <CardTitle className="text-sm font-medium text-Text-A">Good Condition</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-Text-A">{stats.availableItems}</div>
+          <div className="text-2xl font-bold text-Text-A">{stats.totalItemBaik}</div>
+        </CardContent>
+      </Card>
+
+      <Card className="bg-white/10 border-white/20">
+        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+          <CardTitle className="text-sm font-medium text-Text-A">Bad Condition</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-2xl font-bold text-Text-A">{stats.totalItemRusak}</div>
         </CardContent>
       </Card>
 
@@ -32,16 +41,16 @@ export function StatsCards({ stats }: StatsCardsProps) {
           <CardTitle className="text-sm font-medium text-Text-A">Borrowed Items</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-Text-A">{stats.borrowedItems}</div>
+          <div className="text-2xl font-bold text-Text-A">{stats.totalItemDipinjam}</div>
         </CardContent>
       </Card>
 
       <Card className="bg-white/10 border-white/20">
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <CardTitle className="text-sm font-medium text-Text-A">Total Requests</CardTitle>
+          <CardTitle className="text-sm font-medium text-Text-A">Pending Requests</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="text-2xl font-bold text-Text-A">{stats.totalRequests}</div>
+          <div className="text-2xl font-bold text-Text-A">{stats.totalPermintaanPeminjaman}</div>
         </CardContent>
       </Card>
     </div>

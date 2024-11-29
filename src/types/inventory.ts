@@ -1,26 +1,23 @@
+import { ReturnedCondition } from '@/models/LoanRequest';
+
 interface InventoryItem {
-  id: string
+  id: number
   name: string
   kategori: string
   kondisi: string
-  kuantitas: number
+  status: string
   imageUrl: string
-  status: 'Available' | 'Borrowed'
+  totalKuantitas: number
+  availableQuantity?: number
+  damagedQuantity?: number
 }
 
-//  interface BorrowedItem {
-//   _id: string,
-//   inventoryId: string,
-//   userId: string,
-//   name: string,
-//   kuantitas: number,
-//   status: "Delivered",
-//   isReturned: boolean,
-//   returnedCondition: "baik",
-//   loanId: 4,
-//   __v: 0, 
-//   namaUser: "Anonymous"
-// }
+interface SeparatedInventoryItem {
+  id: number
+  kondisi: ReturnedCondition
+  status: 'Available' | 'Borrowed'
+  kuantitas: number
+}
 
 interface BorrowedItem {
   trackingId: string
@@ -47,13 +44,11 @@ interface BorrowedStats {
 }
 
 interface Stats {
-  totalItems: number;
-  availableItems: number;
-  borrowedItems: number;
-  totalUsers: number;
-  totalRequests: number;
-  pendingRequests: number;
-  completedRequests: number;
+  totalItem: number;
+  totalItemBaik: number;
+  totalItemRusak: number;
+  totalItemDipinjam: number;
+  totalPermintaanPeminjaman: number;
 }
 
 interface NavbarProps {
@@ -61,4 +56,4 @@ interface NavbarProps {
   path: string;
 }
 
-export type { NavbarProps, InventoryItem, BorrowedItem, InventoryStats, BorrowedStats, Stats };
+export type { NavbarProps, InventoryItem, BorrowedItem, InventoryStats, BorrowedStats, Stats, SeparatedInventoryItem };

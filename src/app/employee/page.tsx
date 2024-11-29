@@ -1,16 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from 'react'
-import axios from "axios"
+import { api } from "@/lib/api"
 import { InventoryTable } from "@/components/items-for-loan"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import type { InventoryItem } from "@/types/inventory"
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { useRouter } from 'next/navigation'
+import { Skeleton } from "@/components/ui/skeleton"
 
 export default function InventoryPage() {
-  const router = useRouter();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
@@ -22,10 +21,9 @@ export default function InventoryPage() {
     const fetchItems = async () => {
       setLoading(true);
       try {
-        const response = await axios.get(
-          "https://api.boxsystem.site/user/inventory"
-        );
+        const response = await api.get('/user/inventory');
         setItems(response.data);
+        console.log('Response:', response.data);
       } catch (err) {
         setError("Failed to fetch inventory data.");
         console.error(err);
@@ -69,16 +67,26 @@ export default function InventoryPage() {
     setCurrentPage(1); // Reset to first page when searching
   };
 
-  const handleItemClick = () => {
-    router.push('/employee/loan');
-  };
-
   if (loading) {
-    return <p className="text-white text-center">Loading...</p>;
-  }
-
-  if (error) {
-    return <p className="text-red-500">{error}</p>;
+    return (
+      <div className="space-y-8 w-full min-h-screen bg-Background-A p-4 md:p-8">
+        <Skeleton className="h-8 w-64 bg-white/10" />
+        <div className="flex justify-between items-center">
+          <Skeleton className="h-10 w-32 bg-white/10" />
+          <Skeleton className="h-10 w-48 bg-white/10" />
+        </div>
+        <div className="space-y-4">
+          {[...Array(5)].map((_, idx) => (
+            <Skeleton key={idx} className="h-16 w-full bg-white/10" />
+          ))}
+        </div>
+        <div className="flex justify-center gap-2">
+          {[...Array(3)].map((_, idx) => (
+            <Skeleton key={idx} className="h-10 w-10 bg-white/10" />
+          ))}
+        </div>
+      </div>
+    );
   }
 
   return (
@@ -110,8 +118,13 @@ export default function InventoryPage() {
           />
         </div>
       </div>
-      <div className="overflow-x-auto" onClick={handleItemClick}>
+      <div className="overflow-x-auto">
         <InventoryTable items={paginatedItems} />
+        {(error || items.length === 0) && (
+          <div className="h-screen flex items-center justify-center">
+            <p className="text-Text-A text-xl">No Items Available</p>
+          </div>
+        )}
       </div>
       <div className="flex justify-center gap-2 flex-wrap">
         <Button 
