@@ -10,10 +10,6 @@ const nextConfig: NextConfig = {
       {
         source: '/api/:path*',
         destination: `${process.env.NEXT_PUBLIC_BACKEND_URL}/:path*`
-      },
-      {
-        source: '/:path*',
-        destination: '/'
       }
     ];
   },

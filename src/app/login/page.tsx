@@ -67,8 +67,12 @@ const LoginPage = () => {
           description: "Successfully logged in",
         });
 
-        // Force a page reload to refresh the session and navigation state
-        window.location.href = session?.user?.role === 'admin' ? '/admin' : '/employee';
+        // Get the callback URL from the URL parameters
+        const params = new URLSearchParams(window.location.search);
+        const callbackUrl = params.get('callbackUrl') || 
+          (session?.user?.role === 'admin' ? '/admin' : '/employee');
+        
+        window.location.href = callbackUrl;
       }
     } catch (error) {
       console.error('Login error:', error);
