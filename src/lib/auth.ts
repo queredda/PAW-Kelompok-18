@@ -36,7 +36,7 @@ export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: {
     strategy: 'jwt',
-    maxAge: 1 * 60 * 60, // 1 hours
+    maxAge: 1 * 60 * 60, // 1 hour
   },
   jwt: {
     maxAge: 1 * 60 * 60, // 1 hours
@@ -47,11 +47,13 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-        token.role = user.role as "user" | "admin";
+        token.role = user.role;
       }
+      console.log("JWT Token:", token);
       return token;
     },
     async session({ session, token }) {
+      console.log("Session Token:", token);
       return {
         ...session,
         user: {

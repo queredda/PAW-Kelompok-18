@@ -3,13 +3,13 @@
 import React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import * as z from "zod";
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useToast } from "@/hooks/use-toast";
+import { useToast } from '@/hooks/use-toast';
 import { signIn } from 'next-auth/react';
 import {
   Form,
@@ -17,11 +17,11 @@ import {
   FormField,
   FormItem,
   FormMessage,
-} from "@/components/ui/form";
+} from '@/components/ui/form';
 
 const formSchema = z.object({
-  email: z.string().email("Email harus diisi dengan benar"),
-  password: z.string().min(1, "Password harus diisi"),
+  email: z.string().email('Email harus diisi dengan benar'),
+  password: z.string().min(1, 'Password harus diisi'),
 });
 
 const LoginPage = () => {
@@ -30,10 +30,13 @@ const LoginPage = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: '',
+      password: '',
     },
   });
+
+  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
+  const callbackUrl = searchParams.get('callbackUrl') || '/';
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
@@ -54,8 +57,8 @@ const LoginPage = () => {
 
       if (!emailCheckData.exists) {
         toast({
-          variant: "destructive",
-          description: "No account found with this email",
+          variant: 'destructive',
+          description: 'No account found with this email',
         });
         return;
       }
@@ -65,28 +68,25 @@ const LoginPage = () => {
         email: values.email,
         password: values.password,
         redirect: false,
+        callbackUrl: callbackUrl,
       });
 
       if (signInData?.error) {
         toast({
-          variant: "destructive",
-          description: "Invalid password",
+          variant: 'destructive',
+          description: 'Invalid password',
         });
       } else {
         toast({
-          description: "Successfully logged in",
+          description: 'Successfully logged in',
         });
-        // Wait for the session to be updated
-        setTimeout(() => {
-          router.refresh();
-          router.push("/");
-        }, 1000);
+        router.push(signInData?.url || callbackUrl);
       }
     } catch (error) {
       console.error('Login error:', error);
       toast({
-        variant: "destructive",
-        description: "An error occurred during login",
+        variant: 'destructive',
+        description: 'An error occurred during login',
       });
     }
   };
@@ -117,7 +117,10 @@ const LoginPage = () => {
               </CardHeader>
 
               <Form {...form}>
-                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                <form
+                  onSubmit={form.handleSubmit(handleSubmit)}
+                  className="space-y-6"
+                >
                   <FormField
                     control={form.control}
                     name="email"

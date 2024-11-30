@@ -48,15 +48,6 @@ const Navbar: React.FC = () => {
     }
   }, [session, session?.user?.role, status]);
 
-  useEffect(() => {
-    if (status === 'authenticated') {
-      const role = session?.user?.role;
-      if (role) {
-        setCurrentNavItems(protectedNavItems(role));
-      }
-    }
-  }, [session, session?.user?.role, status]);
-
   const handleScroll = (): void => {
     const scroll = window.scrollY;
     setIsScrolled(scroll > 20);
