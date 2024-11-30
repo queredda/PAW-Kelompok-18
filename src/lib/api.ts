@@ -2,25 +2,28 @@ import axios from 'axios';
 import { getSession } from 'next-auth/react';
 
 export const api = axios.create({
-  baseURL: '/api',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true
 });
 
 api.interceptors.request.use(async (config) => {
-  const session = await getSession();
-
-  if (session?.accessToken) {
-    config.headers.Authorization = `Bearer ${session.accessToken}`;
-  }
+  console.log('Debug - Request URL:', config.url);
+  console.log('Debug - Request Headers:', config.headers);
+  
   return config;
 });
 
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    console.error('API Error:', error);
+    console.error('API Error:', {
+      status: error.response?.status,
+      data: error.response?.data,
+      headers: error.response?.headers
+    });
     return Promise.reject(error);
   }
 );

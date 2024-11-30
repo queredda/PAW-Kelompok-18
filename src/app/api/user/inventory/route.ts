@@ -6,11 +6,17 @@ import { RequestStatus } from '@/models/LoanRequest';
 
 export async function GET(req: NextRequest) {
   try {
-    // Verify user authentication
-    const token = await getToken({ req });
-    if (!token?.sub) {
+    const token = await getToken({ 
+      req,
+      secret: process.env.NEXTAUTH_SECRET
+    });
+    
+    console.log('Debug - Token:', token);
+
+    if (!token?.id) {
+      console.log('Debug - No token found or invalid token');
       return NextResponse.json(
-        { message: 'Unauthorized' },
+        { message: 'Unauthorized - Please login' },
         { status: 401 }
       );
     }

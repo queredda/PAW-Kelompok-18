@@ -1,138 +1,65 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { AuthController } from '@/controllers/auth';
-import connectDB from '@/lib/db';
-import bcrypt from 'bcryptjs';
-
-// Rate limiting setup
-const MAX_ATTEMPTS = 5;
-const BLOCK_DURATION = 10 * 60 * 1000; // 10 minutes in milliseconds
-
-interface AttemptInfo {
-  attempts: number;
-  lastAttempt: number;
-}
-
-const loginAttempts: Map<string, AttemptInfo> = new Map();
-
-declare module 'next-auth' {
-  interface Session {
-    user: {
-      id: string;
-      email: string;
-      name: string;
-      role: string;
-    };
-  }
-  interface User {
-    id: string;
-    email: string;
-    name: string;
-    role: string;
-  }
-}
+import { compare } from 'bcryptjs';
+import { getModels } from '@/lib/models';
 
 export const authOptions: NextAuthOptions = {
-  secret: process.env.NEXTAUTH_SECRET,
-  session: {
-    strategy: 'jwt',
-    maxAge: 1 * 60 * 60, // 1 hour
-  },
-  jwt: {
-    maxAge: 1 * 60 * 60, // 1 hours
-  },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.name = user.name;
-        token.role = user.role as "user" || "admin";
-      }
-      console.log("JWT Token:", token);
-      return token;
-    },
-    async session({ session, token }) {
-      console.log("Session Token:", token);
-      return {
-        ...session,
-        user: {
-          id: token.id as string,
-          email: token.email as string,
-          name: token.name as string,
-          role: token.role as string,
-        },
-      };
-    },
-  },
   providers: [
     CredentialsProvider({
       name: 'Credentials',
       credentials: {
-        email: { label: 'Email', type: 'text' },
-        password: { label: 'Password', type: 'password' },
+        email: { label: "Email", type: "email" },
+        password: { label: "Password", type: "password" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        if (!credentials?.email || !credentials?.password) {
+          throw new Error('Missing credentials');
+        }
 
-        // Rate limiting logic
-        const attemptInfo = loginAttempts.get(credentials.email) || {
-          attempts: 0,
-          lastAttempt: Date.now(),
+        const { UserModel } = getModels();
+        const user = await UserModel.findOne({ email: credentials.email });
+
+        if (!user) {
+          throw new Error('No user found');
+        }
+
+        const isValid = await compare(credentials.password, user.password);
+
+        if (!isValid) {
+          throw new Error('Invalid password');
+        }
+
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role as 'user' | 'admin'
         };
-        const timeSinceLastAttempt = Date.now() - attemptInfo.lastAttempt;
-
-        if (
-          attemptInfo.attempts >= MAX_ATTEMPTS &&
-          timeSinceLastAttempt < BLOCK_DURATION
-        ) {
-          // Too many attempts, deny access
-          throw new Error('Too many login attempts. Please try again later.');
-        }
-
-        if (timeSinceLastAttempt > BLOCK_DURATION) {
-          // Reset attempts after block duration
-          attemptInfo.attempts = 0;
-        }
-
-        attemptInfo.attempts += 1;
-        attemptInfo.lastAttempt = Date.now();
-        loginAttempts.set(credentials.email, attemptInfo);
-
-        try {
-          await connectDB();
-
-          const user = await AuthController.findUserByEmail(credentials.email);
-          
-          if (!user) {
-            return null;
-          }
-
-          const isValidPassword = await bcrypt.compare(credentials.password, user.password);
-
-          if (!isValidPassword) {
-            return null;
-          }
-
-          // Successful login, reset attempts
-          loginAttempts.delete(credentials.email);
-
-          return {
-            id: user._id.toString(),
-            email: user.email,
-            name: user.name,
-            role: user.role,
-          };
-        } catch (error) {
-          console.error('Authorization error:', error);
-          return null;
-        }
-      },
-    }),
+      }
+    })
   ],
-  pages: {
-    signIn: '/auth/login',
-    signOut: '/auth/logout',
+  callbacks: {
+    async jwt({ token, user }) {
+      if (user) {
+        token.id = user.id;
+        token.role = user.role;
+      }
+      return token;
+    },
+    async session({ session, token }) {
+      if (session.user) {
+        session.user.id = token.id as string;
+        session.user.role = token.role as 'user' | 'admin';
+      }
+      return session;
+    }
   },
-  debug: process.env.NODE_ENV === 'development',
+  pages: {
+    signIn: '/login',
+  },
+  session: {
+    strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
+  secret: process.env.NEXTAUTH_SECRET,
 };
