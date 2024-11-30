@@ -35,9 +35,6 @@ const LoginPage = () => {
     },
   });
 
-  const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : '');
-  const callbackUrl = searchParams.get('callbackUrl') || '/';
-
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       // First, check if the email exists
@@ -67,8 +64,8 @@ const LoginPage = () => {
       const signInData = await signIn('credentials', {
         email: values.email,
         password: values.password,
-        redirect: false,
-        callbackUrl: callbackUrl,
+        redirect: true,
+        callbackUrl: '/',
       });
 
       if (signInData?.error) {
@@ -80,7 +77,6 @@ const LoginPage = () => {
         toast({
           description: 'Successfully logged in',
         });
-        router.push(signInData?.url || callbackUrl);
       }
     } catch (error) {
       console.error('Login error:', error);

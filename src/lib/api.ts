@@ -10,7 +10,6 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-
   return config;
 });
 
@@ -77,7 +76,9 @@ export const createLoanRequest = async (data: {
 
 export const fetchLoanRequests = async (isAdmin: boolean = false) => {
   try {
-    const endpoint = isAdmin ? '/api/admin/loan-requests' : '/api/user/loan-requests';
+    const endpoint = isAdmin
+      ? '/api/admin/loan-requests'
+      : '/api/user/loan-requests';
     const response = await api.get(endpoint);
     return response.data;
   } catch (error) {
