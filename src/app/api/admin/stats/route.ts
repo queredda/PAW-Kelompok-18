@@ -2,8 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/db';
 import { getModels } from '@/lib/models';
 import { getToken } from 'next-auth/jwt';
-import { inventorySeparator } from '@/lib/inventory-utils';
-import { SeparatedInventoryItem } from '@/types/inventory';
+import { LoanRequest, RequestStatus } from '@/types/request';
 
 export async function GET(req: NextRequest) {
   try {
@@ -26,29 +25,44 @@ export async function GET(req: NextRequest) {
       0
     );
 
-    // Process separated inventories
-    const separatedInventories: SeparatedInventoryItem[] = [];
-    for (const inventory of allInventories) {
-      const separatedInventory = await inventorySeparator(inventory.id);
-      separatedInventories.push(...separatedInventory);
-    }
+    // Get all loan requests
+    const loanRequests = await LoanRequestModel.find() as unknown as LoanRequest[];
+    
+    // Calculate borrowed items (using 'Delivered' status)
+    const totalItemDipinjam = loanRequests
+      .filter(request => request.status === 'Delivered')
+      .reduce((acc, request) => acc + (request.kuantitas || 0), 0);
 
-    // Calculate statistics
-    const totalItemBaik = separatedInventories
-      .filter(item => item.kondisi === 'baik')
-      .reduce((acc, item) => acc + item.kuantitas, 0);
+    // Calculate damaged items (using 'Canceled' status with 'rusak' condition)
+    const totalItemRusak = loanRequests
+      .filter(request => 
+        request.status === 'Canceled' && 
+        request.returnedCondition === 'rusak'
+      )
+      .reduce((acc, request) => acc + (request.kuantitas || 0), 0);
 
-    const totalItemRusak = separatedInventories
-      .filter(item => item.kondisi === 'rusak')
-      .reduce((acc, item) => acc + item.kuantitas, 0);
+    // Calculate good condition items
+    const totalItemBaik = totalItem - totalItemDipinjam - totalItemRusak;
 
-    const totalItemDipinjam = separatedInventories
-      .filter(item => item.status === 'Borrowed')
-      .reduce((acc, item) => acc + item.kuantitas, 0);
+    // Get pending requests
+    const totalPermintaanPeminjaman = await LoanRequestModel.countDocuments({
+      status: 'Proses' as RequestStatus
+    });
 
-    // Get pending loan requests
-    const loanRequests = await LoanRequestModel.find({ status: 'Proses' });
-    const totalPermintaanPeminjaman = loanRequests.length;
+    // Debug: Log the calculations
+    console.log('Debug calculations:', {
+      totalItem,
+      totalItemBaik,
+      totalItemRusak,
+      totalItemDipinjam,
+      totalPermintaanPeminjaman,
+      allRequests: loanRequests.length,
+      requestStatuses: [...new Set(loanRequests.map(req => req.status))],
+      damagedItems: loanRequests.filter(req => 
+        req.status === 'Canceled' && 
+        req.returnedCondition === 'rusak'
+      )
+    });
 
     return NextResponse.json({
       totalItem,
@@ -57,6 +71,7 @@ export async function GET(req: NextRequest) {
       totalItemDipinjam,
       totalPermintaanPeminjaman,
     });
+
   } catch (error) {
     console.error('Admin stats error:', error);
     return NextResponse.json(

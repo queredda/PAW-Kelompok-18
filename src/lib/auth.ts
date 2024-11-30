@@ -47,7 +47,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id;
         token.email = user.email;
         token.name = user.name;
-        token.role = user.role;
+        token.role = user.role as "user" || "admin";
       }
       console.log("JWT Token:", token);
       return token;

@@ -35,15 +35,15 @@ const Navbar: React.FC = () => {
   const [currentNavItems, setCurrentNavItems] = useState<NavbarProps[]>(publicNavItems);
 
   useEffect(() => {
-    console.log('Session status:', status);
-    console.log('Session data:', session);
+    // console.log('Session status:', status);
+    // console.log('Session data:', session);
 
     if (status === 'authenticated' && session?.user?.role) {
       const items = protectedNavItems(session.user.role);
-      console.log('Setting protected items:', items);
+      // console.log('Setting protected items:', items);
       setCurrentNavItems(items);
     } else {
-      console.log('Setting public items');
+      // console.log('Setting public items');
       setCurrentNavItems(publicNavItems);
     }
   }, [session, session?.user?.role, status]);

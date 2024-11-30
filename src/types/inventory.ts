@@ -1,5 +1,3 @@
-import { ReturnedCondition } from '@/models/LoanRequest';
-
 interface InventoryItem {
   id: number
   name: string
@@ -14,9 +12,11 @@ interface InventoryItem {
 
 interface SeparatedInventoryItem {
   id: number
-  kondisi: ReturnedCondition
-  status: 'Available' | 'Borrowed'
+  name: string
+  kondisi: string
   kuantitas: number
+  status: string
+  kategori: string
 }
 
 interface BorrowedItem {

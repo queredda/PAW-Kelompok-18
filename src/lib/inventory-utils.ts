@@ -1,74 +1,67 @@
 import { getModels } from './models';
 import { SeparatedInventoryItem } from '@/types/inventory';
-import { RequestStatus, ReturnedCondition } from '@/models/LoanRequest';
-import createHttpError from 'http-errors';
+import { LoanRequest, RequestStatus } from '@/types/request';
 
-export async function inventorySeparator(id: string): Promise<SeparatedInventoryItem[]> {
+export async function inventorySeparator(inventoryId: string | number) {
   const { InventoryModel, LoanRequestModel } = getModels();
 
-  const inventory = await InventoryModel.findOne({ id });
-  if (!inventory) throw createHttpError(404, 'Inventory not found');
+  const inventory = await InventoryModel.findOne({
+    id: Number(inventoryId),
+  });
 
-  const loanRequests = await LoanRequestModel.find({ inventoryId: id });
-  const inventoryResponse: SeparatedInventoryItem[] = [];
+  if (!inventory) return [];
 
-  if (loanRequests.length === 0) {
-    inventoryResponse.push({
+  // Type the loan requests
+  const loanRequests = (await LoanRequestModel.find({
+    inventoryId: Number(inventoryId),
+    status: {
+      $in: ['Delivered', 'Canceled'] as RequestStatus[],
+    },
+  })) as unknown as LoanRequest[];
+
+  const totalLoaned = loanRequests
+    .filter((request) => request.status === 'Delivered')
+    .reduce((acc, request) => acc + (request.kuantitas || 0), 0);
+
+  const totalBadCondition = loanRequests
+    .filter(
+      (request) =>
+        request.status === 'Canceled' && request.returnedCondition === 'rusak'
+    )
+    .reduce((acc, request) => acc + (request.kuantitas || 0), 0);
+
+  const separatedItems: SeparatedInventoryItem[] = [
+    {
       id: inventory.id,
-      kondisi: ReturnedCondition.Baik,
+      name: inventory.name,
+      kondisi: 'baik',
+      kuantitas: inventory.totalKuantitas - totalLoaned - totalBadCondition,
       status: 'Available',
-      kuantitas: inventory.totalKuantitas
+      kategori: inventory.kategori,
+    },
+  ];
+
+  if (totalLoaned > 0) {
+    separatedItems.push({
+      id: inventory.id,
+      name: inventory.name,
+      kondisi: 'baik',
+      kuantitas: totalLoaned,
+      status: 'Borrowed',
+      kategori: inventory.kategori,
     });
-  } else {
-    loanRequests.forEach((loanRequest) => {
-      inventoryResponse.push({
-        id: inventory.id,
-        kondisi: loanRequest.isReturned && loanRequest.returnedCondition 
-          ? loanRequest.returnedCondition 
-          : ReturnedCondition.Baik,
-        status: loanRequest.status === RequestStatus.Delivered ? 'Borrowed' : 'Available',
-        kuantitas: loanRequest.kuantitas
-      });
-    });
-
-    const editedInventoryResponse: SeparatedInventoryItem[] = [];
-
-    // Group and sum quantities for each status/condition combination
-    for (const item of inventoryResponse) {
-      const index = editedInventoryResponse.findIndex(
-        inv => inv.status === item.status && inv.kondisi === item.kondisi
-      );
-
-      if (index === -1) {
-        editedInventoryResponse.push(item);
-      } else {
-        editedInventoryResponse[index].kuantitas += item.kuantitas;
-      }
-    }
-
-    // Calculate available good condition items
-    const totalKuantitas = inventory.totalKuantitas;
-    const totalAvailableRusak = editedInventoryResponse.find(
-      inv => inv.status === 'Available' && inv.kondisi === ReturnedCondition.Rusak
-    )?.kuantitas || 0;
-    const totalBorrowed = editedInventoryResponse.find(
-      inv => inv.status === 'Borrowed' && inv.kondisi === ReturnedCondition.Baik
-    )?.kuantitas || 0;
-
-    const totalKeduanya = totalAvailableRusak + totalBorrowed;
-    const totalAvailableBaik = totalKuantitas - totalKeduanya;
-
-    if (totalAvailableBaik > 0) {
-      editedInventoryResponse.push({
-        id: inventory.id,
-        kondisi: ReturnedCondition.Baik,
-        status: 'Available',
-        kuantitas: totalAvailableBaik
-      });
-    }
-
-    return editedInventoryResponse;
   }
 
-  return inventoryResponse;
-} 
+  if (totalBadCondition > 0) {
+    separatedItems.push({
+      id: inventory.id,
+      name: inventory.name,
+      kondisi: 'rusak',
+      kuantitas: totalBadCondition,
+      status: 'Available',
+      kategori: inventory.kategori,
+    });
+  }
+
+  return separatedItems;
+}
