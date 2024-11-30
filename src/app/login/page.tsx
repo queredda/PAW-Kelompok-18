@@ -76,14 +76,10 @@ const LoginPage = () => {
         toast({
           description: "Successfully logged in",
         });
-        
-        // Get the callback URL from the URL parameters
-        const params = new URLSearchParams(window.location.search);
-        const callbackUrl = params.get('callbackUrl') || '/';
-        
         // Wait for the session to be updated
         setTimeout(() => {
-          router.push(callbackUrl);
+          router.refresh();
+          router.push("/");
         }, 1000);
       }
     } catch (error) {
