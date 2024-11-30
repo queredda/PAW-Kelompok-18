@@ -6,13 +6,13 @@ export const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true
+  withCredentials: true,
 });
 
 api.interceptors.request.use(async (config) => {
   console.log('Debug - Request URL:', config.url);
   console.log('Debug - Request Headers:', config.headers);
-  
+
   return config;
 });
 
@@ -22,7 +22,7 @@ api.interceptors.response.use(
     console.error('API Error:', {
       status: error.response?.status,
       data: error.response?.data,
-      headers: error.response?.headers
+      headers: error.response?.headers,
     });
     return Promise.reject(error);
   }
