@@ -46,7 +46,7 @@ export function BorrowedItemsTable({
   const handleAction = async (loanId: number, action: 'Terima' | 'Tolak') => {
     try {
       setIsLoading(true);
-      const response = await api.patch('/admin/loan-requests', {
+      const response = await api.patch('/api/admin/loan-requests', {
         loanId: loanId,
         status: action,
       });
@@ -79,7 +79,7 @@ export function BorrowedItemsTable({
 
     try {
       setIsLoading(true);
-      const response = await api.patch('/admin/returned-items', {
+      const response = await api.patch('/api/admin/returned-items', {
         loanId: selectedLoanId,
         returnedCondition: condition,
       });

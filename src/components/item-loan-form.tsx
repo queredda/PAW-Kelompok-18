@@ -84,7 +84,7 @@ export function ItemLoanForm() {
 
     try {
       setLoading(true);
-      await api.post('/user/loan-request', {
+      await api.post('/api/user/loan-request', {
         inventoryId: selectedItem.id,
         kuantitas: quantity,
       });

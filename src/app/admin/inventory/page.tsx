@@ -23,14 +23,16 @@ export default function InventoryPage() {
     const fetchItems = async () => {
       setLoading(true);
       try {
-        const response = await api.get('/admin/inventory');
-        console.log('Inventory response:', response.data);
-        setItems(response.data);
+        const response = await api.get('/api/admin/inventory');
+        const data = Array.isArray(response.data) ? response.data : [];
+        console.log('Inventory response:', data);
+        setItems(data);
       } catch (err: Error | unknown) {
         const error = err as Error;
         setError(
           'message' in error ? error.message : 'Failed to fetch inventory data.'
         );
+        console.error('Fetch error:', err);
       } finally {
         setLoading(false);
       }
@@ -39,15 +41,15 @@ export default function InventoryPage() {
     fetchItems();
   }, []);
 
-  const filteredItems = items.filter((item) => {
+  const filteredItems = Array.isArray(items) ? items.filter((item) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      item.name.toLowerCase().includes(searchLower) ||
-      item.kategori.toLowerCase().includes(searchLower) ||
-      item.kondisi.toLowerCase().includes(searchLower) ||
-      item.status.toLowerCase().includes(searchLower)
+      (item?.name || '').toLowerCase().includes(searchLower) ||
+      (item?.kategori || '').toLowerCase().includes(searchLower) ||
+      (item?.kondisi || '').toLowerCase().includes(searchLower) ||
+      (item?.status || '').toLowerCase().includes(searchLower)
     );
-  });
+  }) : [];
 
   const totalPages = Math.ceil(filteredItems.length / entriesPerPage);
   const paginatedItems = filteredItems.slice(

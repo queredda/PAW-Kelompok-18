@@ -10,8 +10,6 @@ export const api = axios.create({
 });
 
 api.interceptors.request.use(async (config) => {
-  console.log('Debug - Request URL:', config.url);
-  console.log('Debug - Request Headers:', config.headers);
 
   return config;
 });
@@ -30,7 +28,7 @@ api.interceptors.response.use(
 
 export const fetchProfile = async () => {
   try {
-    const response = await api.get('/auth/profile');
+    const response = await api.get('/api/auth/profile');
     return response.data;
   } catch (error) {
     console.error('Error fetching profile:', error);
@@ -45,7 +43,7 @@ export const registerUser = async (userData: {
   password: string;
 }) => {
   try {
-    const response = await api.post('/auth/register', userData);
+    const response = await api.post('/api/auth/register', userData);
     return response.data;
   } catch (error) {
     console.error('Error registering user:', error);
@@ -55,7 +53,7 @@ export const registerUser = async (userData: {
 
 export const fetchInventory = async (isAdmin: boolean = false) => {
   try {
-    const endpoint = isAdmin ? '/admin/inventory' : '/user/inventory';
+    const endpoint = isAdmin ? '/api/admin/inventory' : '/api/user/inventory';
     const response = await api.get(endpoint);
     return response.data;
   } catch (error) {
@@ -69,7 +67,7 @@ export const createLoanRequest = async (data: {
   kuantitas: number;
 }) => {
   try {
-    const response = await api.post('/user/loan-request', data);
+    const response = await api.post('/api/user/loan-request', data);
     return response.data;
   } catch (error) {
     console.error('Error creating loan request:', error);
@@ -79,7 +77,7 @@ export const createLoanRequest = async (data: {
 
 export const fetchLoanRequests = async (isAdmin: boolean = false) => {
   try {
-    const endpoint = isAdmin ? '/admin/loan-requests' : '/user/loan-requests';
+    const endpoint = isAdmin ? '/api/admin/loan-requests' : '/api/user/loan-requests';
     const response = await api.get(endpoint);
     return response.data;
   } catch (error) {
@@ -95,7 +93,7 @@ export const register = async (data: {
   role: 'user' | 'admin';
 }) => {
   try {
-    const response = await api.post('/auth/register', {
+    const response = await api.post('/api/auth/register', {
       ...data,
       role: data.role || 'user',
     });
@@ -108,7 +106,7 @@ export const register = async (data: {
 
 export const updateProfile = async (formData: FormData) => {
   try {
-    const response = await api.patch('/auth/profile', formData, {
+    const response = await api.patch('/api/auth/profile', formData, {
       headers: {
         'Content-Type': 'multipart/form-data',
       },

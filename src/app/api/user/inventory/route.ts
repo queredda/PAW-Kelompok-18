@@ -11,10 +11,7 @@ export async function GET(req: NextRequest) {
       secret: process.env.NEXTAUTH_SECRET
     });
     
-    console.log('Debug - Token:', token);
-
     if (!token?.id) {
-      console.log('Debug - No token found or invalid token');
       return NextResponse.json(
         { message: 'Unauthorized - Please login' },
         { status: 401 }

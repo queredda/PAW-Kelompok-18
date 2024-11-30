@@ -9,10 +9,8 @@ export async function POST(req: NextRequest) {
     const { InventoryModel, LoanRequestModel } = getModels();
 
     const token = await getToken({ req });
-    console.log('Token in API:', token); // Debug log
 
     if (!token?.sub) {
-      console.log('No user ID in token:', token); // Debug log
       return NextResponse.json(
         { message: 'Unauthorized - Please log in' },
         { status: 401 }
@@ -45,8 +43,6 @@ export async function POST(req: NextRequest) {
       kuantitas: Number(kuantitas),
       imageUrl: inventory.imageUrl,
     });
-
-    console.log('Creating loan request:', loanRequest); // Debug log
 
     await loanRequest.save();
 

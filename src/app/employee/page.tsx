@@ -21,7 +21,7 @@ export default function InventoryPage() {
     const fetchItems = async () => {
       setLoading(true);
       try {
-        const response = await api.get('/user/inventory');
+        const response = await api.get('api/user/inventory');
         setItems(response.data);
         console.log('Response:', response.data);
       } catch (err) {

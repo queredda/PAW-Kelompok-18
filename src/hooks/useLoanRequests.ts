@@ -38,7 +38,7 @@ export function useLoanRequests() {
     const fetchLoanRequests = async () => {
       try {
         setLoading(true);
-        const response = await api.get('/admin/loan-requests');
+        const response = await api.get('/api/admin/loan-requests');
         
         const transformedData = {
           pending: response.data.pending.map(transformLoanRequest),
