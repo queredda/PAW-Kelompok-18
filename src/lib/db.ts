@@ -10,7 +10,7 @@ declare global {
   var mongoose: CachedConnection | undefined;
 }
 
-const MONGODB_URI = process.env.MONGODB_URI_DEV || process.env.MONGODB_URI;
+const MONGODB_URI = process.env.MONGODB_URI || process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
   throw new Error('Please define either MONGODB_URI_DEV or MONGODB_URI environment variable');
