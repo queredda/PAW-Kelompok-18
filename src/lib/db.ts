@@ -27,7 +27,6 @@ if (!global.mongoose) {
 
 async function connectDB(): Promise<typeof mongoose> {
   if (cached.conn) {
-    console.log('Using cached database connection');
     return cached.conn;
   }
 
@@ -36,16 +35,23 @@ async function connectDB(): Promise<typeof mongoose> {
       bufferCommands: false,
     };
 
-    console.log('Connecting to MongoDB...');
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then(async (mongoose) => {
-      console.log('MongoDB connected successfully');
-      
-      // Initialize counters after successful connection
-      const { initializeCounters } = await import('@/models/Counter');
-      await initializeCounters();
-      
-      return mongoose;
-    });
+    cached.promise = mongoose
+      .connect(MONGODB_URI!, opts)
+      .then(async (mongoose) => {
+        try {
+          console.log('MongoDB connected successfully');
+
+          // Initialize counters after successful connection
+          const { initializeCounters } = await import('@/models/Counter');
+          await initializeCounters();
+          console.log('Counters initialized successfully');
+
+          return mongoose;
+        } catch (error) {
+          console.error('Error during initialization:', error);
+          throw error;
+        }
+      });
   }
 
   try {
