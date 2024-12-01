@@ -15,12 +15,22 @@ export enum ReturnedCondition {
 
 @pre<LoanRequest>('save', async function() {
   if (this.isNew) {
-    const counter = await CounterModel.findByIdAndUpdate(
-      { _id: 'loanRequestId' },
-      { $inc: { seq: 1 } },
-      { new: true, upsert: true }
-    );
-    this.loanId = counter.seq;
+    try {
+      const counter = await CounterModel.findByIdAndUpdate(
+        { _id: 'loanRequestId' },
+        { $inc: { seq: 1 } },
+        { new: true, upsert: true }
+      );
+      
+      if (!counter || typeof counter.seq !== 'number') {
+        throw new Error('Failed to generate sequence number');
+      }
+      
+      this.loanId = counter.seq;
+    } catch (error) {
+      console.error('Error generating loan ID:', error);
+      throw error;
+    }
   }
 })
 export class LoanRequest {

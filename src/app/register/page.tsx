@@ -48,9 +48,9 @@ const RegisterPage = () => {
         password: formData.password,
         role: formData.role
       };
+      console.log('Register data:', registerData);
       
       await register(registerData);
-
       toast({
         title: 'Success',
         description: 'Registration successful! Please login.',

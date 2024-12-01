@@ -37,8 +37,13 @@ async function connectDB(): Promise<typeof mongoose> {
     };
 
     console.log('Connecting to MongoDB...');
-    cached.promise = mongoose.connect(MONGODB_URI!, opts).then((mongoose) => {
+    cached.promise = mongoose.connect(MONGODB_URI!, opts).then(async (mongoose) => {
       console.log('MongoDB connected successfully');
+      
+      // Initialize counters after successful connection
+      const { initializeCounters } = await import('@/models/Counter');
+      await initializeCounters();
+      
       return mongoose;
     });
   }
