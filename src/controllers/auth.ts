@@ -2,9 +2,12 @@ import { User, UserModel } from '@/models/User';
 import createHttpError from 'http-errors';
 import { DocumentType } from '@typegoose/typegoose';
 import bcrypt from 'bcryptjs';
+import mongoose from 'mongoose';
 
 export class AuthController {
-  public static async findUserByEmail(email: string): Promise<DocumentType<User>> {
+  public static async findUserByEmail(
+    email: string
+  ): Promise<DocumentType<User>> {
     try {
       if (!email) {
         throw createHttpError(400, 'Email is required');
@@ -31,7 +34,7 @@ export class AuthController {
   }): Promise<DocumentType<User>> {
     try {
       const { name, email, password, role } = data;
-      
+
       if (!email || !password) {
         throw createHttpError(400, 'Email and password are required');
       }
@@ -47,10 +50,18 @@ export class AuthController {
 
       // Create new user with explicit role and hashed password
       const user = new UserModel({
+        _id: new mongoose.Types.ObjectId(),
         name,
         email,
-        password: hashedPassword, // Store the hashed password
+        password: hashedPassword,
         role: role || 'user',
+      });
+
+      console.log('Creating user with data:', {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
       });
 
       await user.save();
@@ -116,4 +127,4 @@ export class AuthController {
       throw error;
     }
   }
-} 
+}

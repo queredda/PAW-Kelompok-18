@@ -22,7 +22,12 @@ export async function POST(req: NextRequest) {
     
     console.log('Registering user with data:', body);
     const user = await AuthController.register(body);
-    console.log('User registered successfully:', user._id);
+    console.log('User registered successfully:', {
+      id: user._id,
+      email: user.email,
+      name: user.name,
+      role: user.role
+    });
     
     return NextResponse.json({ 
       message: 'Registration successful',
@@ -35,11 +40,25 @@ export async function POST(req: NextRequest) {
     });
   } catch (error) {
     console.error('Registration error:', error);
-    // Log the full error object for debugging
-    console.error('Full error object:', JSON.stringify(error, null, 2));
+    // Log the full error details
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        message: error.message,
+        stack: error.stack,
+        name: error.name
+      });
+    }
+    
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : 'Registration failed' },
-      { status: error instanceof Error && error.message.includes('exists') ? 409 : 500 }
+      { 
+        message: error instanceof Error ? error.message : 'Registration failed',
+        details: process.env.NODE_ENV === 'development' ? error : undefined
+      },
+      { 
+        status: error instanceof Error && error.message.includes('exists') 
+          ? 409 
+          : 500 
+      }
     );
   }
 }
