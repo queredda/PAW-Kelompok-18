@@ -37,46 +37,26 @@ const LoginPage = () => {
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      // First, check if the email exists
-      const checkEmailResponse = await fetch('/api/auth/check-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ email: values.email }),
-      });
-
-      if (!checkEmailResponse.ok) {
-        throw new Error('Failed to check email');
-      }
-
-      const emailCheckData = await checkEmailResponse.json();
-
-      if (!emailCheckData.exists) {
-        toast({
-          variant: 'destructive',
-          description: 'No account found with this email',
-        });
-        return;
-      }
-
-      // If email exists, proceed with login
       const signInData = await signIn('credentials', {
         email: values.email,
         password: values.password,
-        redirect: true,
-        callbackUrl: '/',
+        redirect: false,
       });
-
       if (signInData?.error) {
         toast({
           variant: 'destructive',
-          description: 'Invalid password',
+          title: 'Login Gagal',
+          description: 'Email atau password salah',
         });
       } else {
         toast({
-          description: 'Successfully logged in',
+          title: 'Login Berhasil',
+          description: 'Berhasil masuk ke akunmu',
         });
+        setTimeout(() => {
+          router.refresh();
+          router.push('/');
+        }, 1000);
       }
     } catch (error) {
       console.error('Login error:', error);
