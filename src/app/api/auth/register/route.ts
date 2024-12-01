@@ -33,4 +33,4 @@ export async function POST(req: NextRequest) {
       { status: error instanceof Error && error.message.includes('exists') ? 409 : 500 }
     );
   }
-} 
+}
