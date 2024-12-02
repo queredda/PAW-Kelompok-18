@@ -22,7 +22,7 @@ export default function ProtectedRoute({ children, requireAdmin = false }: Prote
       return;
     }
 
-    if (requireAdmin && session.user?.role !== 'admin') {
+    if (requireAdmin && session.user?.role !== 'ADMIN') {
       router.push('/login');
     }
   }, [session, status, router, requireAdmin]);
