@@ -3,14 +3,14 @@ import { NavbarProps } from '@/types/inventory';
 export type { NavbarProps };
 
 export const protectedNavItems = (role: string): NavbarProps[] => {  
-  if (role === 'admin') {
+  if (role === 'ADMIN') {
     return [
       { menu: 'Dashboard', path: '/admin' },
       { menu: 'Inventory', path: '/admin/inventory' },
       { menu: 'Borrowed', path: '/admin/borrowed' },
       { menu: 'Account', path: '/account' },
     ];
-  } else if (role === 'user') {
+  } else if (role === 'USER') {
     return [
       { menu: 'Dashboard', path: '/employee' },
       { menu: 'Loan', path: '/employee/loan' },
