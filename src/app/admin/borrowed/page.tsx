@@ -5,13 +5,43 @@ import { Input } from '@/components/ui/input';
 import { useState } from 'react';
 import { useLoanRequests } from '@/hooks/useLoanRequests';
 import { Skeleton } from '@/components/ui/skeleton';
+import { LoanStatus, ReturnCondition } from '@prisma/client';
+
+interface LoanRequestWithRelations {
+  id: string;
+  requestNumber: string;
+  name: string;
+  kuantitas: number;
+  status: LoanStatus;
+  isReturned: boolean;
+  returnedCondition: ReturnCondition | null;
+  imageUrl: string;
+  createdAt: string;
+  inventory: {
+    imageUrl: string | null;
+    name: string;
+  };
+  account: {
+    username: string;
+  };
+}
+
+interface LoanRequestData {
+  pending: LoanRequestWithRelations[];
+  borrowed: LoanRequestWithRelations[];
+  returned: LoanRequestWithRelations[];
+}
 
 export default function BorrowedItemsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data, loading, error } = useLoanRequests();
+  const { data, loading, error } = useLoanRequests() as {
+    data: LoanRequestData | null;
+    loading: boolean;
+    error: string | null;
+  };
 
   if (loading) {
     return (
@@ -30,18 +60,18 @@ export default function BorrowedItemsPage() {
     return <div className="text-red-500">{error}</div>;
   }
 
-  const allItems = [
+  const allItems: LoanRequestWithRelations[] = [
     ...(data?.pending || []),
     ...(data?.borrowed || []),
     ...(data?.returned || []),
   ];
 
-  // The data is already transformed, so we can filter directly
-  const filteredItems = allItems.filter((item) =>
-    item.loanId.toString().includes(searchQuery.toLowerCase()) ||
-    item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.namaUser?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.status.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredItems = allItems.filter(
+    (item) =>
+      item.requestNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.inventory.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.account.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.status.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredItems.length / entriesPerPage);
@@ -63,7 +93,7 @@ export default function BorrowedItemsPage() {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   return (
