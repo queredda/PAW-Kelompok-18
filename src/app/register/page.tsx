@@ -24,7 +24,7 @@ const RegisterPage = () => {
     email: '',
     password: '',
     confirmPassword: '',
-    role: 'user' as 'user' | 'admin',
+    role: 'USER' as 'USER' | 'ADMIN',
   });
   const [isLoading, setIsLoading] = useState(false);
 
@@ -141,7 +141,7 @@ const RegisterPage = () => {
                 />
                 <Select
                   value={formData.role}
-                  onValueChange={(value: 'user' | 'admin') =>
+                  onValueChange={(value: 'USER' | 'ADMIN') =>
                     setFormData((prev) => ({ ...prev, role: value }))
                   }
                 >
@@ -149,8 +149,8 @@ const RegisterPage = () => {
                     <SelectValue placeholder="Select role" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="user">User</SelectItem>
-                    <SelectItem value="admin">Admin</SelectItem>
+                    <SelectItem value="USER">User</SelectItem>
+                    <SelectItem value="ADMIN">Admin</SelectItem>
                   </SelectContent>
                 </Select>
                 <Button

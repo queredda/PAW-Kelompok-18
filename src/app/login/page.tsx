@@ -18,9 +18,10 @@ import {
   FormItem,
   FormMessage,
 } from '@/components/ui/form';
+import { getSession } from 'next-auth/react';
 
 const formSchema = z.object({
-  email: z.string().email('Email harus diisi dengan benar'),
+  identifier: z.string().min(1, 'Email atau username harus diisi'),
   password: z.string().min(1, 'Password harus diisi'),
 });
 
@@ -30,40 +31,54 @@ const LoginPage = () => {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      email: '',
+      identifier: '',
       password: '',
     },
   });
 
   const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      const signInData = await signIn('credentials', {
-        email: values.email,
+      const result = await signIn('credentials', {
+        username: values.identifier,
+        email: values.identifier,
         password: values.password,
-        redirect: true,
-        callbackUrl: '/',
+        redirect: false,
       });
-      if (signInData?.error) {
+
+      console.log('SignIn Result:', result);
+
+      if (!result?.ok) {
         toast({
           variant: 'destructive',
           title: 'Login Gagal',
-          description: 'Email atau password salah',
+          description: 'Username/Email atau password salah',
         });
+        return;
+      }
+
+      toast({
+        title: 'Login Berhasil',
+        description: 'Berhasil masuk ke akunmu',
+      });
+
+      const session = await getSession();
+      console.log('Session:', session);
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (session?.user?.role === 'ADMIN') {
+        router.refresh();
+        router.push('/admin');
       } else {
-        toast({
-          title: 'Login Berhasil',
-          description: 'Berhasil masuk ke akunmu',
-        });
-        setTimeout(() => {
-          router.refresh();
-          router.push('/');
-        }, 1000);
+        router.refresh();
+        router.push('/employee');
       }
     } catch (error) {
       console.error('Login error:', error);
       toast({
         variant: 'destructive',
-        description: 'An error occurred during login',
+        title: 'Error',
+        description: 'Terjadi kesalahan saat login',
       });
     }
   };
@@ -100,14 +115,14 @@ const LoginPage = () => {
                 >
                   <FormField
                     control={form.control}
-                    name="email"
+                    name="identifier"
                     render={({ field }) => (
                       <FormItem>
                         <FormControl>
                           <Input
                             {...field}
-                            type="email"
-                            placeholder="Email"
+                            type="text"
+                            placeholder="Email atau Username"
                             className="bg-Input-A text-gray-700 rounded-full border-0 placeholder:text-gray-500"
                           />
                         </FormControl>
