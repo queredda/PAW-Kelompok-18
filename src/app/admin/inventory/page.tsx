@@ -7,49 +7,57 @@ import { Input } from '@/components/ui/input';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 import React, { useState, useEffect } from 'react';
-import { api } from '@/lib/api';
+import axios from 'axios';
 import { InventoryItem } from '@/types/inventory';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useSession } from 'next-auth/react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function InventoryPage() {
+  const { status } = useSession();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const { toast } = useToast();
 
   useEffect(() => {
     const fetchItems = async () => {
+      if (status !== 'authenticated') return;
+      
       setLoading(true);
       try {
-        const response = await api.get('/api/admin/inventory');
+        const response = await axios.get('/api/admin/inventory', {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        
         const data = Array.isArray(response.data) ? response.data : [];
         console.log('Inventory response:', data);
         setItems(data);
-      } catch (err: Error | unknown) {
-        const error = err as Error;
-        setError(
-          'message' in error ? error.message : 'Failed to fetch inventory data.'
-        );
+      } catch (err) {
         console.error('Fetch error:', err);
+        setError('Failed to fetch inventory data.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchItems();
-  }, []);
+  }, [status]);
 
-  const filteredItems = Array.isArray(items) ? items.filter((item) => {
+  const filteredItems = items.filter((item) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      (item?.name || '').toLowerCase().includes(searchLower) ||
-      (item?.kategori || '').toLowerCase().includes(searchLower) ||
-      (item?.kondisi || '').toLowerCase().includes(searchLower) ||
-      (item?.status || '').toLowerCase().includes(searchLower)
+      item.name.toLowerCase().includes(searchLower) ||
+      item.kategori.toLowerCase().includes(searchLower) ||
+      item.kondisi.toLowerCase().includes(searchLower) ||
+      item.status.toLowerCase().includes(searchLower)
     );
-  }) : [];
+  });
 
   const totalPages = Math.ceil(filteredItems.length / entriesPerPage);
   const paginatedItems = filteredItems.slice(
@@ -70,7 +78,32 @@ export default function InventoryPage() {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this item?')) {
+      return;
+    }
+
+    try {
+      await axios.delete(`/api/admin/inventory/${id}`);
+      
+      toast({
+        title: 'Success',
+        description: 'Item deleted successfully',
+      });
+      
+      // Update the items list by filtering out the deleted item
+      setItems(items.filter(item => item.id !== id));
+    } catch (error) {
+      console.error('Delete error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to delete item',
+      });
+    }
   };
 
   if (loading) {
@@ -139,7 +172,10 @@ export default function InventoryPage() {
               </p>
             </div>
           ) : (
-            <InventoryTable items={paginatedItems} />
+            <InventoryTable 
+              items={paginatedItems} 
+              onDelete={handleDelete}
+            />
           )}
         </div>
         <div className="flex justify-center gap-2 flex-wrap">
