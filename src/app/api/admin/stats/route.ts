@@ -1,67 +1,69 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
-import { getModels } from '@/lib/models';
 import { getToken } from 'next-auth/jwt';
-import { LoanRequest, RequestStatus } from '@/types/request';
+import prisma from '@/lib/prisma';
+import { LoanStatus, ReturnCondition, ItemCondition } from '@prisma/client';
 
 export async function GET(req: NextRequest) {
   try {
-    // Verify admin authentication
     const token = await getToken({ req });
-    if (!token?.sub || token.role !== 'admin') {
+    if (!token?.sub || token.role !== 'ADMIN') {
       return NextResponse.json(
         { message: 'Unauthorized - Admin access required' },
         { status: 401 }
       );
     }
 
-    await connectDB();
-    const { InventoryModel, LoanRequestModel } = getModels();
+    // Get all inventories and loan requests
+    const [inventories, loanRequests] = await Promise.all([
+      prisma.inventory.findMany(),
+      prisma.loanRequest.findMany({
+        where: {
+          OR: [
+            { returnedCondition: ReturnCondition.RUSAK },
+            { status: LoanStatus.DELIVERED }
+          ]
+        }
+      })
+    ]);
 
-    // Get all inventories
-    const allInventories = await InventoryModel.find();
-    const totalItem = allInventories.reduce(
-      (acc, inventory) => acc + inventory.totalKuantitas,
+    // Calculate statistics
+    const totalItem = inventories.reduce(
+      (acc, inv) => acc + inv.totalKuantitas,
       0
     );
 
-    // Get all loan requests
-    const loanRequests = await LoanRequestModel.find() as unknown as LoanRequest[];
-    
-    // Calculate borrowed items (using 'Delivered' status)
+    // Count items in bad condition from inventory
+    const totalItemRusakFromInventory = inventories.filter(
+      inv => inv.kondisi === ItemCondition.RUSAK
+    ).reduce((acc, inv) => acc + inv.totalKuantitas, 0);
+
+    // Count items returned in bad condition from loan requests
+    const totalItemRusakFromReturns = loanRequests.filter(
+      req => req.returnedCondition === ReturnCondition.RUSAK
+    ).reduce((acc, req) => acc + req.kuantitas, 0);
+
+    // Total damaged items is the sum from both sources
+    const totalItemRusak = totalItemRusakFromInventory + totalItemRusakFromReturns;
+
+    // Calculate borrowed items
     const totalItemDipinjam = loanRequests
-      .filter(request => request.status === 'Delivered')
-      .reduce((acc, request) => acc + (request.kuantitas || 0), 0);
+      .filter(req => req.status === LoanStatus.DELIVERED)
+      .reduce((acc, req) => acc + req.kuantitas, 0);
 
-    // Calculate damaged items (using 'Canceled' status with 'rusak' condition)
-    const totalItemRusak = loanRequests
-      .filter(request => 
-        request.status === 'Canceled' && 
-        request.returnedCondition === 'rusak'
-      )
-      .reduce((acc, request) => acc + (request.kuantitas || 0), 0);
+    // Calculate items in good condition
+    const totalItemBaik = totalItem - totalItemRusak - totalItemDipinjam;
 
-    // Calculate good condition items
-    const totalItemBaik = totalItem - totalItemDipinjam - totalItemRusak;
-
-    // Get pending requests
-    const totalPermintaanPeminjaman = await LoanRequestModel.countDocuments({
-      status: 'Proses' as RequestStatus
-    });
-
-    // Debug: Log the calculations
-    console.log('Debug calculations:', {
-      totalItem,
-      totalItemBaik,
-      totalItemRusak,
-      totalItemDipinjam,
-      totalPermintaanPeminjaman,
-      allRequests: loanRequests.length,
-      requestStatuses: [...new Set(loanRequests.map(req => req.status))],
-      damagedItems: loanRequests.filter(req => 
-        req.status === 'Canceled' && 
-        req.returnedCondition === 'rusak'
-      )
+    // Get recent requests
+    const recentRequests = await prisma.loanRequest.findMany({
+      take: 5,
+      orderBy: { createdAt: 'desc' },
+      include: {
+        account: {
+          select: {
+            username: true
+          }
+        }
+      }
     });
 
     return NextResponse.json({
@@ -69,13 +71,12 @@ export async function GET(req: NextRequest) {
       totalItemBaik,
       totalItemRusak,
       totalItemDipinjam,
-      totalPermintaanPeminjaman,
+      recentRequests
     });
-
   } catch (error) {
-    console.error('Admin stats error:', error);
+    console.error('Fetch stats error:', error);
     return NextResponse.json(
-      { message: error instanceof Error ? error.message : 'Failed to fetch admin stats' },
+      { message: 'Failed to fetch statistics' },
       { status: 500 }
     );
   }
