@@ -1,3 +1,5 @@
+import { LoanStatus, ReturnCondition } from '@prisma/client';
+
 export interface LoanRequest {
   trackingId?: string;
   product: {
@@ -7,13 +9,13 @@ export interface LoanRequest {
   customer?: string;
   date?: string;
   amount?: number;
-  status: string;
-  loanId: number;
+  status: LoanStatus;
+  requestNumber: string;
   name: string;
   namaUser?: string;
   imageUrl?: string;
   isReturned: boolean;
-  returnedCondition: string;
-  inventoryId: number;
+  returnedCondition?: ReturnCondition | null;
+  inventoryId: string;
   kuantitas: number;
 } 

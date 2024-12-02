@@ -1,21 +1,26 @@
-interface InventoryItem {
-  id: number
-  name: string
-  kategori: string
-  kondisi: string
-  status: string
-  imageUrl: string
-  totalKuantitas: number
-  availableQuantity?: number
-  damagedQuantity?: number
+import { InventoryStatus, ItemCondition } from '@prisma/client';
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  kategori: string;
+  totalKuantitas: number;
+  imageUrl?: string | null;
+  status: InventoryStatus;
+  kondisi: ItemCondition;
+  totalItemRusak: number;
+  totalItemBaik: number;
+  totalItemDipinjam: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
 interface SeparatedInventoryItem {
-  id: number
+  id: string
   name: string
-  kondisi: string
+  kondisi: ItemCondition
   kuantitas: number
-  status: string
+  status: InventoryStatus
   kategori: string
 }
 
@@ -56,4 +61,4 @@ interface NavbarProps {
   path: string;
 }
 
-export type { NavbarProps, InventoryItem, BorrowedItem, InventoryStats, BorrowedStats, Stats, SeparatedInventoryItem };
+export type { NavbarProps, BorrowedItem, InventoryStats, BorrowedStats, Stats, SeparatedInventoryItem };
