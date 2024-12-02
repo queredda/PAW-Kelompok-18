@@ -6,12 +6,14 @@ import { useEffect, useState } from 'react';
 import { fetchProfile } from '@/lib/api';
 import defaultPic from '/public/profile/default.svg';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Role } from '@prisma/client';
 
 interface ProfileData {
-  profilePic?: string;
+  id: string;
   name: string;
   email: string;
-  role: string;
+  role: Role;
+  profilePic: string | null;
 }
 
 export default function AccountPage() {
@@ -28,10 +30,16 @@ export default function AccountPage() {
 
   useEffect(() => {
     const getProfileData = async () => {
-      if (session?.user) {
+      if (session?.user?.id) {
         try {
           const data = await fetchProfile();
-          setProfileData(data);
+          setProfileData({
+            id: data.id,
+            name: data.name,
+            email: data.email,
+            role: data.role,
+            profilePic: data.profilePic
+          });
         } catch (error) {
           console.error('Failed to fetch profile:', error);
         }
@@ -45,11 +53,14 @@ export default function AccountPage() {
     profilePic?: string;
     name: string;
     email: string;
-    role: string;
+    role: Role;
   }) => {
     setIsUpdating(true);
-    setProfileData(newData);
     try {
+      if (profileData) {
+        const updatedProfile = { ...profileData, ...newData };
+        setProfileData(updatedProfile);
+      }
       const updatedData = await fetchProfile();
       setProfileData(updatedData);
       router.refresh();
@@ -81,8 +92,9 @@ export default function AccountPage() {
     );
   }
 
-  if (!session?.user?.name || !session?.user?.email) {
-    return <div>Missing user information</div>;
+  // Check for either session user data or profile data
+  if (!profileData && !session?.user) {
+    return <div>Loading user information...</div>;
   }
 
   return (
@@ -92,9 +104,9 @@ export default function AccountPage() {
       </h1>
       <ProfileCard
         imageUrl={profileData?.profilePic || defaultPic}
-        name={profileData?.name || session.user.name}
-        email={profileData?.email || session.user.email}
-        accountType={profileData?.role || session.user.role}
+        name={profileData?.name || session?.user?.username || ''}
+        email={profileData?.email || session?.user?.email || ''}
+        accountType={profileData?.role || (session?.user?.role as Role) || Role.USER}
         onProfileUpdate={handleProfileUpdate}
       />
     </div>
