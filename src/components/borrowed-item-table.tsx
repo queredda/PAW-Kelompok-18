@@ -20,13 +20,32 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { useState } from 'react';
-import { api } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
 import { AxiosError } from 'axios';
-import { LoanRequest } from '@/types/loan';
+import { LoanStatus, ReturnCondition } from '@prisma/client';
+import { updateLoanRequestStatus, updateReturnedItem } from '@/lib/api';
+
+interface BorrowedItem {
+  id: string;
+  requestNumber: string;
+  name: string;
+  kuantitas: number;
+  status: LoanStatus;
+  isReturned: boolean;
+  returnedCondition: ReturnCondition | null;
+  imageUrl: string | null;
+  createdAt: string;
+  account: {
+    username: string;
+  };
+  inventory: {
+    imageUrl: string | null;
+    name: string;
+  };
+}
 
 interface BorrowedItemsTableProps {
-  items: LoanRequest[];
+  items: BorrowedItem[];
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
@@ -40,26 +59,28 @@ export function BorrowedItemsTable({
 }: BorrowedItemsTableProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [selectedLoanId, setSelectedLoanId] = useState<number | null>(null);
+  const [selectedRequestNumber, setSelectedRequestNumber] =
+    useState<string>('');
   const { toast } = useToast();
 
-  const handleAction = async (loanId: number, action: 'Terima' | 'Tolak') => {
+  const handleAction = async (
+    requestNumber: string,
+    action: 'Terima' | 'Tolak'
+  ) => {
     try {
       setIsLoading(true);
-      const response = await api.patch('/api/admin/loan-requests', {
-        loanId: loanId,
+      await updateLoanRequestStatus({
+        requestNumber,
         status: action,
       });
 
-      if (response.data) {
-        toast({
-          title: 'Success',
-          description: `Request ${
-            action === 'Terima' ? 'accepted' : 'rejected'
-          } successfully`,
-        });
-        window.location.reload();
-      }
+      toast({
+        title: 'Success',
+        description: `Request ${
+          action === 'Terima' ? 'accepted' : 'rejected'
+        } successfully`,
+      });
+      window.location.reload();
     } catch (error) {
       console.error('Error updating loan request:', error);
       const axiosError = error as AxiosError<{ message: string }>;
@@ -74,24 +95,22 @@ export function BorrowedItemsTable({
     }
   };
 
-  const handleReturn = async (condition: 'baik' | 'rusak') => {
-    if (!selectedLoanId) return;
+  const handleReturn = async (condition: ReturnCondition) => {
+    if (!selectedRequestNumber) return;
 
     try {
       setIsLoading(true);
-      const response = await api.patch('/api/admin/returned-items', {
-        loanId: selectedLoanId,
+      await updateReturnedItem({
+        requestNumber: selectedRequestNumber,
         returnedCondition: condition,
       });
 
-      if (response.data) {
-        toast({
-          title: 'Success',
-          description: 'Item return status updated successfully',
-        });
-        setIsDialogOpen(false);
-        window.location.reload();
-      }
+      toast({
+        title: 'Success',
+        description: 'Item return status updated successfully',
+      });
+      setIsDialogOpen(false);
+      window.location.reload();
     } catch (error) {
       console.error('Error updating return status:', error);
       const axiosError = error as AxiosError<{ message: string }>;
@@ -107,8 +126,8 @@ export function BorrowedItemsTable({
     }
   };
 
-  const openReturnDialog = (loanId: number) => {
-    setSelectedLoanId(loanId);
+  const openReturnDialog = (requestNumber: string) => {
+    setSelectedRequestNumber(requestNumber);
     setIsDialogOpen(true);
   };
 
@@ -116,104 +135,116 @@ export function BorrowedItemsTable({
     return <div className="text-Text-A font-pop">No items to display</div>;
   }
 
-  const renderTableContent = (status: string) => (
-    <div className="rounded-md border border-white/10 bg-white/5">
-      <Table>
-        <TableHeader>
-          <TableRow className="border-white/20">
-            <TableHead className="text-Text-A font-pop">Tracking ID</TableHead>
-            <TableHead className="text-Text-A font-pop">Product</TableHead>
-            <TableHead className="text-Text-A font-pop">Customer</TableHead>
-            <TableHead className="text-Text-A font-pop">Date</TableHead>
-            <TableHead className="text-Text-A font-pop">Amount</TableHead>
-            <TableHead className="text-Text-A font-pop">Status</TableHead>
-            {status === 'Proses' && (
-              <TableHead className="text-Text-A font-pop">Action</TableHead>
-            )}
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {items
-            .filter((item) => item.status === status)
-            .map((item) => (
-              <TableRow key={item.trackingId} className="border-white/5">
-                <TableCell className="font-medium text-Text-A font-pop">
-                  {item.trackingId}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-2">
-                    <Image
-                      src={item.product.image}
-                      alt={item.product.name}
-                      className="h-8 w-8 rounded-full"
-                      width={32}
-                      height={32}
-                    />
-                    <span className="text-Text-A font-pop">
-                      {item.product.name}
-                    </span>
-                  </div>
-                </TableCell>
-                <TableCell className="text-Text-A font-pop">
-                  {item.customer}
-                </TableCell>
-                <TableCell className="text-Text-A font-pop">
-                  {item.date}
-                </TableCell>
-                <TableCell className="text-Text-A font-pop">
-                  {item.amount}
-                </TableCell>
-                <TableCell>
-                  <span
-                    className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold font-pop ${
-                      status === 'Proses'
-                        ? 'bg-yellow-500/10 text-yellow-500'
-                        : status === 'Delivered'
-                        ? 'bg-green-500/10 text-green-500'
-                        : 'bg-red-500/10 text-red-500'
-                    }`}
-                  >
-                    {item.status}
-                  </span>
-                </TableCell>
-                {status === 'Proses' && (
+  const renderTableContent = (status: LoanStatus) => (
+    <div className="w-full overflow-x-auto">
+      <div className="min-w-[800px] rounded-md border border-white/10 bg-white/5">
+        <Table>
+          <TableHeader>
+            <TableRow className="border-white/20">
+              <TableHead className="text-Text-A font-pop whitespace-nowrap">Tracking ID</TableHead>
+              <TableHead className="text-Text-A font-pop whitespace-nowrap">Product</TableHead>
+              <TableHead className="text-Text-A font-pop whitespace-nowrap">Customer</TableHead>
+              <TableHead className="text-Text-A font-pop whitespace-nowrap">Date</TableHead>
+              <TableHead className="text-Text-A font-pop whitespace-nowrap">Amount</TableHead>
+              <TableHead className="text-Text-A font-pop whitespace-nowrap">Status</TableHead>
+              {status === LoanStatus.PROSES && (
+                <TableHead className="text-Text-A font-pop whitespace-nowrap">Action</TableHead>
+              )}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {items
+              .filter((item) => item.status === status)
+              .map((item) => (
+                <TableRow key={item.requestNumber} className="border-white/5">
+                  <TableCell className="font-medium text-Text-A font-pop max-w-[100px] truncate">
+                    {item.requestNumber}
+                  </TableCell>
                   <TableCell>
-                    <div className="flex gap-2">
-                      <Button
-                        onClick={() => handleAction(item.loanId, 'Terima')}
-                        disabled={isLoading}
-                        variant="ghost"
-                        className="bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-Text-A font-pop"
-                      >
-                        Accept
-                      </Button>
-                      <Button
-                        onClick={() => handleAction(item.loanId, 'Tolak')}
-                        disabled={isLoading}
-                        variant="ghost"
-                        className="bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-Text-A font-pop"
-                      >
-                        Reject
-                      </Button>
+                    <div className="flex items-center gap-2">
+                      <div className="relative h-8 w-8 shrink-0">
+                        <Image
+                          src={item.inventory.imageUrl || '/placeholder-image.jpg'}
+                          alt={item.inventory.name}
+                          className="rounded-full object-cover"
+                          fill
+                          sizes="32px"
+                        />
+                      </div>
+                      <span className="text-Text-A font-pop truncate">
+                        {item.inventory.name}
+                      </span>
                     </div>
                   </TableCell>
-                )}
-                {status === 'Delivered' && (
-                  <TableCell>
-                    <Button
-                      onClick={() => openReturnDialog(item.loanId)}
-                      disabled={isLoading}
-                      variant="ghost"
-                      className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 hover:text-Text-A font-pop"
-                    >
-                      Return Item
-                    </Button>
+                  <TableCell className="text-Text-A font-pop whitespace-nowrap">
+                    {item.account.username}
                   </TableCell>
-                )}
-              </TableRow>
-            ))}
-        </TableBody>
-      </Table>
+                  <TableCell className="text-Text-A font-pop whitespace-nowrap">
+                    {new Date(item.createdAt).toLocaleDateString('id-ID', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </TableCell>
+                  <TableCell className="text-Text-A font-pop whitespace-nowrap">
+                    {item.kuantitas}
+                  </TableCell>
+                  <TableCell>
+                    <span
+                      className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold font-pop whitespace-nowrap ${
+                        status === LoanStatus.PROSES
+                          ? 'bg-yellow-500/10 text-yellow-500'
+                          : status === LoanStatus.DELIVERED
+                          ? 'bg-green-500/10 text-green-500'
+                          : 'bg-red-500/10 text-red-500'
+                      }`}
+                    >
+                      {item.status}
+                    </span>
+                  </TableCell>
+                  {status === LoanStatus.PROSES && (
+                    <TableCell>
+                      <div className="flex gap-2">
+                        <Button
+                          onClick={() =>
+                            handleAction(item.requestNumber, 'Terima')
+                          }
+                          disabled={isLoading}
+                          variant="ghost"
+                          className="bg-green-500/10 text-green-500 hover:bg-green-500/20 hover:text-Text-A font-pop whitespace-nowrap"
+                        >
+                          Accept
+                        </Button>
+                        <Button
+                          onClick={() =>
+                            handleAction(item.requestNumber, 'Tolak')
+                          }
+                          disabled={isLoading}
+                          variant="ghost"
+                          className="bg-red-500/10 text-red-500 hover:bg-red-500/20 hover:text-Text-A font-pop whitespace-nowrap"
+                        >
+                          Reject
+                        </Button>
+                      </div>
+                    </TableCell>
+                  )}
+                  {status === LoanStatus.DELIVERED && (
+                    <TableCell>
+                      <Button
+                        onClick={() => openReturnDialog(item.requestNumber)}
+                        disabled={isLoading}
+                        variant="ghost"
+                        className="bg-blue-500/10 text-blue-500 hover:bg-blue-500/20 hover:text-Text-A font-pop whitespace-nowrap"
+                      >
+                        Return Item
+                      </Button>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 
@@ -245,15 +276,15 @@ export function BorrowedItemsTable({
         </TabsList>
 
         <TabsContent value="loan-requests" className="mt-2 md:mt-4">
-          {renderTableContent('Proses')}
+          {renderTableContent(LoanStatus.PROSES)}
         </TabsContent>
 
         <TabsContent value="borrowed" className="mt-2 md:mt-4">
-          {renderTableContent('Delivered')}
+          {renderTableContent(LoanStatus.DELIVERED)}
         </TabsContent>
 
         <TabsContent value="returned" className="mt-2 md:mt-4">
-          {renderTableContent('Canceled')}
+          {renderTableContent(LoanStatus.COMPLETED)}
         </TabsContent>
 
         {/* Pagination */}
@@ -292,23 +323,23 @@ export function BorrowedItemsTable({
       </Tabs>
 
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogContent>
+        <DialogContent className="bg-Background-A border-white/10">
           <DialogHeader>
-            <DialogTitle>Return Item</DialogTitle>
-            <DialogDescription>
+            <DialogTitle className="text-Text-A">Return Item</DialogTitle>
+            <DialogDescription className="text-Text-A/80">
               Select the condition of the returned item
             </DialogDescription>
           </DialogHeader>
           <div className="grid grid-cols-2 gap-4">
             <Button
-              onClick={() => handleReturn('baik')}
+              onClick={() => handleReturn(ReturnCondition.BAIK)}
               disabled={isLoading}
               className="bg-green-500/10 text-green-500 hover:bg-green-500/20"
             >
               Good Condition
             </Button>
             <Button
-              onClick={() => handleReturn('rusak')}
+              onClick={() => handleReturn(ReturnCondition.RUSAK)}
               disabled={isLoading}
               className="bg-red-500/10 text-red-500 hover:bg-red-500/20"
             >
