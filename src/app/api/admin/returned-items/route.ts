@@ -1,27 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import connectDB from '@/lib/db';
-import { getModels } from '@/lib/models';
-import { RequestStatus, ReturnedCondition } from '@/models/LoanRequest';
+import prisma from '@/lib/prisma';
+import { LoanStatus, ReturnCondition } from '@prisma/client';
 
 export async function PATCH(req: NextRequest) {
   try {
-    // Verify admin authentication
     const token = await getToken({ req });
-    if (!token?.sub || token.role !== 'admin') {
+    if (!token?.sub || token.role !== 'ADMIN') {
       return NextResponse.json(
         { message: 'Unauthorized - Admin access required' },
         { status: 401 }
       );
     }
 
-    await connectDB();
-    const { LoanRequestModel } = getModels();
-
-    const body = await req.json();
-    const { loanId, returnedCondition } = body;
-
-    console.log('Received request:', { loanId, returnedCondition });
+    const { requestNumber, returnedCondition } = await req.json();
 
     if (!returnedCondition) {
       return NextResponse.json(
@@ -30,7 +22,10 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    const loanRequest = await LoanRequestModel.findOne({ loanId });
+    const loanRequest = await prisma.loanRequest.findUnique({
+      where: { requestNumber }
+    });
+
     if (!loanRequest) {
       return NextResponse.json(
         { message: 'Loan request not found' },
@@ -45,20 +40,21 @@ export async function PATCH(req: NextRequest) {
       );
     }
 
-    // Update loan request
-    loanRequest.isReturned = true;
-    loanRequest.status = RequestStatus.Canceled;
-    loanRequest.returnedCondition = returnedCondition as ReturnedCondition;
-    await loanRequest.save();
+    const updatedRequest = await prisma.loanRequest.update({
+      where: { requestNumber },
+      data: {
+        isReturned: true,
+        status: LoanStatus.COMPLETED,
+        returnedCondition: returnedCondition as ReturnCondition,
+      }
+    });
 
-    return NextResponse.json(loanRequest);
+    return NextResponse.json(updatedRequest);
   } catch (error) {
     console.error('Update returned item error:', error);
     return NextResponse.json(
-      { 
-        message: error instanceof Error ? error.message : 'Failed to update returned item' 
-      },
+      { message: 'Failed to update returned item' },
       { status: 500 }
     );
   }
-} 
+}
