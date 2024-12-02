@@ -1,77 +1,124 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { compare } from 'bcryptjs';
-import { getModels } from '@/lib/models';
-import connectDB from '@/lib/db';
+import bcrypt from 'bcryptjs';
+import { PrismaClient, Role, Status } from '@prisma/client';
+import { PrismaAdapter } from '@next-auth/prisma-adapter';
+
+const prisma = new PrismaClient();
+
+declare module 'next-auth' {
+  interface Session {
+    user: User & {
+      id: string;
+      username: string;
+      role: Role;
+      status: Status;
+    };
+  }
+  interface User {
+    id: string;
+    username: string;
+    role: Role;
+    status: Status;
+  }
+}
 
 export const authOptions: NextAuthOptions = {
-  providers: [
-    CredentialsProvider({
-      name: 'Credentials',
-      credentials: {
-        email: { label: "Email", type: "email" },
-        password: { label: "Password", type: "password" }
-      },
-      async authorize(credentials) {
-        try {
-          if (!credentials?.email || !credentials?.password) {
-            console.log('Missing credentials');
-            throw new Error('Missing credentials');
-          }
-
-          await connectDB();
-          const { UserModel } = getModels();
-          
-          console.log('Searching for user:', credentials.email);
-          const user = await UserModel.findOne({ email: credentials.email });
-
-          if (!user) {
-            console.log('No user found with email:', credentials.email);
-            throw new Error('No user found');
-          }
-
-          const isValid = await compare(credentials.password, user.password);
-          console.log('Password validation:', isValid);
-
-          if (!isValid) {
-            throw new Error('Invalid password');
-          }
-
-          return {
-            id: user.id,
-            email: user.email,
-            name: user.name,
-            role: user.role as 'user' | 'admin'
-          };
-        } catch (error) {
-          console.error('Auth error:', error);
-          throw error;
-        }
-      }
-    })
-  ],
+  adapter: PrismaAdapter(prisma),
+  secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: 'jwt',
+    maxAge: 1 * 60 * 60,
+  },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.role = user.role;
+        return {
+          ...token,
+          id: user.id,
+          username: user.username,
+          role: user.role,
+          status: user.status || 'ACTIVE',
+        };
       }
       return token;
     },
     async session({ session, token }) {
-      if (session.user) {
-        session.user.id = token.id as string;
-        session.user.role = token.role as 'user' | 'admin';
-      }
-      return session;
-    }
+      return {
+        ...session,
+        user: {
+          ...session.user,
+          id: token.id as string,
+          username: token.username as string,
+          role: token.role as Role,
+          status: token.status as Status,
+        },
+      };
+    },
   },
+  providers: [
+    CredentialsProvider({
+      name: 'Credentials',
+      credentials: {
+        username: { label: 'Username', type: 'text' },
+        email: { label: 'Email', type: 'text' },
+        password: { label: 'Password', type: 'password' },
+      },
+      async authorize(credentials) {
+        try {
+          if (!credentials?.password || (!credentials.email && !credentials.username)) {
+            return null;
+          }
+
+          const user = await prisma.account.findFirst({
+            where: {
+              OR: [
+                { email: credentials.email || credentials.username },
+                { username: credentials.username || credentials.email },
+              ],
+            },
+            select: {
+              id: true,
+              username: true,
+              email: true,
+              password: true,
+              role: true,
+              status: true,
+            },
+          });
+
+          if (!user) {
+            console.log('User not found');
+            return null;
+          }
+
+          const isValidPassword = await bcrypt.compare(
+            credentials.password,
+            user.password
+          );
+
+          if (!isValidPassword) {
+            console.log('Invalid password');
+            return null;
+          }
+
+          return {
+            id: user.id,
+            username: user.username,
+            email: user.email,
+            role: user.role,
+            status: user.status as Status,
+          };
+        } catch (error) {
+          console.error('Authorization error:', error);
+          return null;
+        }
+      },
+    }),
+  ],
   pages: {
     signIn: '/login',
+    error: '/auth/error',
   },
-  session: {
-    strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60, // 30 days
-  },
-  secret: process.env.NEXTAUTH_SECRET,
+  debug: process.env.NODE_ENV === 'development',
 };
