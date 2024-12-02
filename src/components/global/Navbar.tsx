@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { twMerge } from 'tailwind-merge';
-import useScreenType from 'react-screentype-hook';
 import { motion, AnimatePresence } from 'framer-motion';
 import { RiMenu4Fill } from 'react-icons/ri';
 import { HiX } from 'react-icons/hi';
@@ -13,6 +12,7 @@ import {
   protectedNavItems,
   NavbarProps,
 } from '@/metadata/navbar_list';
+import useScreenType from 'react-screentype-hook';
 import { Button } from '../ui/button';
 import Image from 'next/image';
 import { useSession, signOut } from 'next-auth/react';
@@ -29,21 +29,16 @@ const Navbar: React.FC = () => {
   const router = useRouter();
   const pathname = usePathname();
   const screenType = useScreenType();
-  
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState<boolean>(false);
   const [isScrolled, setIsScrolled] = useState<boolean>(false);
-  const [currentNavItems, setCurrentNavItems] = useState<NavbarProps[]>(publicNavItems);
+  const [currentNavItems, setCurrentNavItems] =
+    useState<NavbarProps[]>(publicNavItems);
 
   useEffect(() => {
-    // console.log('Session status:', status);
-    // console.log('Session data:', session);
-
     if (status === 'authenticated' && session?.user?.role) {
       const items = protectedNavItems(session.user.role);
-      // console.log('Setting protected items:', items);
       setCurrentNavItems(items);
     } else {
-      // console.log('Setting public items');
       setCurrentNavItems(publicNavItems);
     }
   }, [session, session?.user?.role, status]);
@@ -74,22 +69,18 @@ const Navbar: React.FC = () => {
     try {
       await signOut({
         redirect: false,
-        callbackUrl: '/login'
+        callbackUrl: '/login',
       });
-      
-      // Force reset the navigation items to public
+
       setCurrentNavItems(publicNavItems);
-      
-      // Clear any cached session data
+
       window.localStorage.removeItem('next-auth.session-token');
       window.localStorage.removeItem('next-auth.callback-url');
       window.localStorage.removeItem('next-auth.csrf-token');
-      
-      // Force a page reload to clear any remaining state
+
       window.location.href = '/login';
     } catch (error) {
       console.error('Error during sign out:', error);
-      // Fallback: force reload even if there's an error
       window.location.href = '/login';
     }
   };
@@ -139,11 +130,11 @@ const Navbar: React.FC = () => {
       return;
     }
 
-    if (session?.user?.role === 'admin' && path.startsWith('/employee')) {
+    if (session?.user?.role === 'ADMIN' && path.startsWith('/employee')) {
       router.push('/admin');
       return;
     }
-    if (session?.user?.role === 'user' && path.startsWith('/admin')) {
+    if (session?.user?.role === 'USER' && path.startsWith('/admin')) {
       router.push('/employee');
       return;
     }
@@ -191,7 +182,11 @@ const Navbar: React.FC = () => {
                 >
                   Inventory Management System
                 </span>
-                <p className="text-sm text-Text-A">
+                <p
+                  className={`text-sm text-Text-A font-pop transition-all duration-200 ${
+                    isScrolled ? 'text-[10px]' : 'text-[12px]'
+                  }`}
+                >
                   Solution for your business
                 </p>
               </div>
