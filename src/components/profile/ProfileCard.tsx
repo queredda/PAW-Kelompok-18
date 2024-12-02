@@ -7,19 +7,19 @@ import { ProfileField } from './ProfileField';
 import { useRef } from 'react';
 import { updateProfile } from '@/lib/api';
 import { useToast } from '@/hooks/use-toast';
+import { Role } from '@prisma/client';
 
-interface ProfileData {
+interface ProfileCardProps {
   imageUrl: string;
   name: string;
   email: string;
-  accountType: string;
-  role?: string;
-  onProfileUpdate?: (newData: {
+  accountType: Role;
+  onProfileUpdate: (newData: {
     profilePic?: string;
     name: string;
     email: string;
-    role: string;
-  }) => void;
+    role: Role;
+  }) => Promise<void>;
 }
 
 export function ProfileCard({
@@ -28,7 +28,7 @@ export function ProfileCard({
   email,
   accountType,
   onProfileUpdate,
-}: ProfileData) {
+}: ProfileCardProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
