@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
+import prisma from '@/lib/prisma';
 
 export async function GET() {
   try {
-    await connectDB();
+    // Test database connection
+    await prisma.$connect();
     return NextResponse.json({ status: 'API is running' });
   } catch {
     return NextResponse.json(
       { message: 'Database connection failed' },
       { status: 500 }
     );
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
