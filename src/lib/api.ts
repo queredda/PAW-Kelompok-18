@@ -1,65 +1,12 @@
 import axios from 'axios';
-import { getSession } from 'next-auth/react';
+import { ReturnCondition, Role } from '@prisma/client';
 
-export const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || '/api',
+const api = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_API_URL || '',
   headers: {
     'Content-Type': 'application/json',
   },
-  withCredentials: true,
 });
-
-api.interceptors.request.use(async (config) => {
-  return config;
-});
-
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    console.error('API Error:', {
-      status: error.response?.status,
-      data: error.response?.data,
-      headers: error.response?.headers,
-    });
-    return Promise.reject(error);
-  }
-);
-
-export const fetchProfile = async () => {
-  try {
-    const response = await api.get('/api/auth/profile');
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching profile:', error);
-    const session = await getSession();
-    return session?.user || null;
-  }
-};
-
-export const registerUser = async (userData: {
-  name: string;
-  email: string;
-  password: string;
-}) => {
-  try {
-    const response = await api.post('/api/auth/register', userData);
-    return response.data;
-  } catch (error) {
-    console.error('Error registering user:', error);
-    throw error;
-  }
-};
-
-export const fetchInventory = async (isAdmin: boolean = false) => {
-  try {
-    const endpoint = isAdmin ? '/api/admin/inventory' : '/api/user/inventory';
-    const response = await api.get(endpoint);
-    return response.data;
-  } catch (error) {
-    console.error('Error fetching inventory:', error);
-    throw error;
-  }
-};
 
 export const createLoanRequest = async (data: {
   inventoryId: string;
@@ -74,33 +21,41 @@ export const createLoanRequest = async (data: {
   }
 };
 
-export const fetchLoanRequests = async (isAdmin: boolean = false) => {
+export const updateLoanRequestStatus = async (data: {
+  requestNumber: string;
+  status: 'Terima' | 'Tolak';
+}) => {
   try {
-    const endpoint = isAdmin
-      ? '/api/admin/loan-requests'
-      : '/api/user/loan-requests';
-    const response = await api.get(endpoint);
+    const response = await api.patch('/api/admin/loan-management', data);
     return response.data;
   } catch (error) {
-    console.error('Error fetching loan requests:', error);
+    console.error('Error updating loan request:', error);
     throw error;
   }
 };
 
-export const register = async (data: {
-  name: string;
-  email: string;
-  password: string;
-  role: 'user' | 'admin';
+export const updateReturnedItem = async (data: {
+  requestNumber: string;
+  returnedCondition: ReturnCondition;
 }) => {
   try {
-    const response = await api.post('/api/auth/register', {
-      ...data,
-      role: data.role || 'user',
-    });
+    const response = await api.patch('/api/admin/returned-items', data);
     return response.data;
   } catch (error) {
-    console.error('Registration error:', error);
+    console.error('Error updating returned item:', error);
+    throw error;
+  }
+};
+
+export const fetchLoanRequests = async (isAdmin: boolean = false) => {
+  try {
+    const endpoint = isAdmin
+      ? '/api/admin/loan-management'
+      : '/api/user/loan-history';
+    const response = await api.get(endpoint);
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching loan requests:', error);
     throw error;
   }
 };
@@ -115,6 +70,41 @@ export const updateProfile = async (formData: FormData) => {
     return response.data;
   } catch (error) {
     console.error('Error updating profile:', error);
+    throw error;
+  }
+};
+
+export const fetchProfile = async (): Promise<{
+  id: string;
+  name: string;
+  email: string;
+  role: Role;
+  profilePic: string | null;
+}> => {
+  try {
+    const response = await api.get('/api/auth/profile');
+    return response.data;
+  } catch (error) {
+    console.error('Error fetching profile:', error);
+    throw error;
+  }
+};
+
+interface RegisterData {
+  name: string;
+  email: string;
+  password: string;
+  role: 'USER' | 'ADMIN';
+}
+
+export const register = async (data: RegisterData) => {
+  try {
+    const response = await axios.post('/api/auth/register', data);
+    return response.data;
+  } catch (error) {
+    if (axios.isAxiosError(error)) {
+      throw new Error(error.response?.data?.message || 'Registration failed');
+    }
     throw error;
   }
 };
