@@ -22,7 +22,7 @@ export default function AccountTypeSelection() {
     return <div>Loading...</div>;
   }
 
-  const patchRole = async (role: 'user' | 'admin') => {
+  const patchRole = async (role: 'USER' | 'ADMIN') => {
     if (status !== 'authenticated' || !session?.accessToken) {
       alert('You must be logged in to perform this action');
       router.push('/login');
@@ -41,7 +41,7 @@ export default function AccountTypeSelection() {
           withCredentials: true
         }
       );
-      router.push(`/register/${role === 'user' ? 'employee' : 'admin'}`);
+      router.push(`/register/${role === 'USER' ? 'employee' : 'ADMIN'}`);
     } catch (error) {
       console.error('Error updating role:', error);
       alert('Failed to update role. Please try again.');
@@ -61,7 +61,7 @@ export default function AccountTypeSelection() {
             <div className="space-y-4 sm:space-y-6 flex flex-col items-center lg:items-start">
               {/* Updated Button untuk Karyawan */}
               <Button
-                onClick={() => patchRole('user')}
+                onClick={() => patchRole('USER')}
                 variant="secondary"
                 className="w-full sm:w-3/4 bg-white text-[#AE66B5] hover:bg-white/90 rounded-full py-2 sm:py-3 text-base sm:text-lg font-medium bg-[#D9D9D9]"
               >
@@ -70,7 +70,7 @@ export default function AccountTypeSelection() {
 
               {/* Updated Button untuk Admin Kantor */}
               <Button
-                onClick={() => patchRole('admin')}
+                onClick={() => patchRole('ADMIN')}
                 variant="secondary"
                 className="w-full sm:w-3/4 bg-white text-[#AE66B5] hover:bg-white/90 rounded-full py-2 sm:py-3 text-base sm:text-lg font-medium bg-[#D9D9D9]"
               >
