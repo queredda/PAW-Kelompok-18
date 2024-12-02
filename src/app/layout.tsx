@@ -1,23 +1,19 @@
-'use client';
-
 import './globals.css';
 import { poppins } from '@/app/font';
-import dynamic from 'next/dynamic';
-import Providers from "../components/providers";
+import Providers from '../components/providers';
+import { Toaster } from '@/components/ui/toaster';
+import { Metadata } from 'next';
 
-
-const Navbar = dynamic(() => import('@/components/global/Navbar'), {
-  ssr: false,
-});
-const Footer = dynamic(() => import('@/components/global/Footer'), {
-  ssr: false,
-});
+import { Navbar, Footer } from '@/components/global/ClientComponents';
 
 interface RootLayoutProps {
   children: React.ReactNode;
 }
 
-
+export const metadata: Metadata = {
+  title: 'BOX',
+  description: 'Solution for your business',
+};
 
 const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
   return (
@@ -25,9 +21,12 @@ const RootLayout: React.FC<RootLayoutProps> = ({ children }) => {
       <body className={`${poppins.variable}`}>
         <Providers>
           <Navbar />
-          <main className={`py-[150px] md:px-[120px] bg-Background-A overflow-hidden`}>
+          <main
+            className={`py-[150px] md:px-[120px] bg-Background-A overflow-hidden`}
+          >
             {children}
           </main>
+          <Toaster />
           <Footer />
         </Providers>
       </body>

@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id           String        @id @default(auto()) @map("_id") @db.ObjectId
+  username     String        @unique
+  email        String        @unique
+  password     String
+  role         Role         @default(USER)
+  status       Status       @default(ACTIVE)
+  profilePic   String?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+  loanRequests LoanRequest[]
+  feedback     Feedback?
+}
+
+model Feedback {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  accountId String   @unique @db.ObjectId
+  status    Status   @default(PENDING)
+  account   Account  @relation(fields: [accountId], references: [id])
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum Status {
+  PENDING
+  VERIFIED
+  ACTIVE
+  INACTIVE
+}
+
+enum LoanStatus {
+  PROSES
+  DELIVERED
+  COMPLETED
+}
+
+enum InventoryStatus {
+  Available
+  Unavailable
+}
+
+enum ItemCondition {
+  BAIK
+  RUSAK
+}
+
+model Inventory {
+  id              String        @id @default(auto()) @map("_id") @db.ObjectId
+  name            String        @unique
+  kategori        String
+  totalKuantitas  Int
+  imageUrl        String?
+  status          InventoryStatus @default(Available)
+  kondisi         ItemCondition   @default(BAIK)
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  loanRequests    LoanRequest[]
+}
+
+enum ReturnCondition {
+  BAIK
+  RUSAK
+}
+
+model LoanRequest {
+  id                String          @id @default(auto()) @map("_id") @db.ObjectId
+  requestNumber     String          @unique @default(uuid())
+  inventoryId       String          @db.ObjectId
+  accountId         String          @db.ObjectId
+  name              String
+  kuantitas         Int
+  status            LoanStatus      @default(PROSES)
+  isReturned        Boolean         @default(false)
+  returnedCondition ReturnCondition?
+  imageUrl          String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  account           Account         @relation(fields: [accountId], references: [id])
+  inventory         Inventory       @relation(fields: [inventoryId], references: [id])
+}

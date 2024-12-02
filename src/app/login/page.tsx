@@ -1,107 +1,85 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import * as z from 'zod';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import axios from 'axios';
+import { useToast } from '@/hooks/use-toast';
+import { signIn } from 'next-auth/react';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormMessage,
+} from '@/components/ui/form';
+import { getSession } from 'next-auth/react';
 
-// Add the JWT parsing function
-const parseJwt = (token: string) => {
-  const base64Url = token.split('.')[1];
-  const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  const jsonPayload = decodeURIComponent(
-    window.atob(base64).split('').map(function(c) {
-      return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-    }).join('')
-  );
-  return JSON.parse(jsonPayload);
-};
+const formSchema = z.object({
+  identifier: z.string().min(1, 'Email atau username harus diisi'),
+  password: z.string().min(1, 'Password harus diisi'),
+});
 
-const LoginPage = (): JSX.Element => {
+const LoginPage = () => {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { toast } = useToast();
+  const form = useForm<z.infer<typeof formSchema>>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      identifier: '',
+      password: '',
+    },
+  });
 
-
-  useEffect(() => {
-    const checkLoginStatus = async () => {
-      const token = localStorage.getItem('token');
-      if (token) {
-        try {
-          const decoded = parseJwt(token);
-          console.log('Decoded token (checkLoginStatus):', decoded);
-          setIsLoggedIn(true);
-
-          if (decoded.role === 'user') {
-            router.push('/employee/');
-          } else if (decoded.role === 'admin') {
-            router.push('/admin/');
-          }
-        } catch (error) {
-          console.error('Error checking profile:', error);
-          localStorage.removeItem('token');
-        }
-      }
-    };
-
-    checkLoginStatus();
-  }, [router]);
-
-  const handleLogout = async () => {
+  const handleSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
-      setIsLoading(true);
-      await axios.get(`${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/logout`, {
-        withCredentials: true,
+      const result = await signIn('credentials', {
+        username: values.identifier,
+        email: values.identifier,
+        password: values.password,
+        redirect: false,
       });
-      localStorage.removeItem('token');
-      setIsLoggedIn(false);
-      router.push('/login');
-    } catch (error) {
-      console.error('Logout error:', error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    try {
-      setIsLoading(true);
+      console.log('SignIn Result:', result);
 
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_URL}/auth/login`,
-        {
-          email,
-          password,
-        },
-        {
-          withCredentials: true,
-        }
-      );
-
-      if (response.data.token) {
-        const token = response.data.token;
-        const decoded = parseJwt(token);
-        console.log('Decoded token (handleSubmit):', decoded);
-
-        localStorage.setItem('token', token);
-        document.cookie = `token=${token}; path=/; max-age=86400; secure; samesite=strict`;
-
-        if (decoded.role === 'user') {
-          router.push('/employee');
-        } else if (decoded.role === 'admin') {
-          router.push('/admin');
-        }
+      if (!result?.ok) {
+        toast({
+          variant: 'destructive',
+          title: 'Login Gagal',
+          description: 'Username/Email atau password salah',
+        });
+        return;
       }
-    } catch (err) {
-      console.error('Login error:', err);
-    } finally {
-      setIsLoading(false);
+
+      toast({
+        title: 'Login Berhasil',
+        description: 'Berhasil masuk ke akunmu',
+      });
+
+      const session = await getSession();
+      console.log('Session:', session);
+
+      await new Promise(resolve => setTimeout(resolve, 1000));
+
+      if (session?.user?.role === 'ADMIN') {
+        router.refresh();
+        router.push('/admin');
+      } else {
+        router.refresh();
+        router.push('/employee');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Terjadi kesalahan saat login',
+      });
     }
   };
 
@@ -126,60 +104,69 @@ const LoginPage = (): JSX.Element => {
             <div className="w-full lg:w-1/2 space-y-8">
               <CardHeader className="p-0">
                 <CardTitle className="text-[28px] sm:text-[36px] font-bold text-center lg:text-left">
-                  {isLoggedIn ? 'Keluar dari akunmu' : 'Masuk ke akunmu'}
+                  Masuk ke akunmu
                 </CardTitle>
               </CardHeader>
 
-              {isLoggedIn ? (
-                <Button
-                  onClick={handleLogout}
-                  className="w-full bg-[#413D79] text-white hover:bg-[#4C51BF] rounded-full border-0"
-                  disabled={isLoading}
+              <Form {...form}>
+                <form
+                  onSubmit={form.handleSubmit(handleSubmit)}
+                  className="space-y-6"
                 >
-                  {isLoading ? 'Loading...' : 'Logout'}
-                </Button>
-              ) : (
-                <>
-                  <form onSubmit={handleSubmit} className="space-y-6">
-                    <Input
-                      type="email"
-                      placeholder="Email"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="bg-Input-A text-gray-700 rounded-full border-0 placeholder:text-gray-500"
-                      required
-                    />
-                    <Input
-                      type="password"
-                      placeholder="Password"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      className="bg-Input-A text-gray-700 rounded-full border-0 placeholder:text-gray-500"
-                      required
-                    />
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <Button
-                        type="submit"
-                        className="w-full bg-[#413D79] text-white hover:bg-[#4C51BF] rounded-full border-0"
-                        disabled={isLoading}
-                      >
-                        {isLoading ? 'Loading...' : 'Login'}
-                      </Button>
-                    </div>
-                  </form>
+                  <FormField
+                    control={form.control}
+                    name="identifier"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="text"
+                            placeholder="Email atau Username"
+                            className="bg-Input-A text-gray-700 rounded-full border-0 placeholder:text-gray-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="password"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            type="password"
+                            placeholder="Password"
+                            className="bg-Input-A text-gray-700 rounded-full border-0 placeholder:text-gray-500"
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <Button
+                    type="submit"
+                    className="w-full bg-[#413D79] text-white hover:bg-[#4C51BF] rounded-full border-0"
+                    disabled={form.formState.isSubmitting}
+                  >
+                    {form.formState.isSubmitting ? 'Loading...' : 'Login'}
+                  </Button>
+                </form>
+              </Form>
 
-                  <div className="text-sm text-center lg:text-left">
-                    Belum punya akun?{' '}
-                    <Button
-                      variant="link"
-                      onClick={() => router.push('/register')}
-                      className="text-pink-300 hover:text-[#413d79] p-0 h-auto font-normal underline"
-                    >
-                      Daftar dulu yuk
-                    </Button>
-                  </div>
-                </>
-              )}
+              <div className="text-sm text-center lg:text-left">
+                Belum punya akun?{' '}
+                <Button
+                  variant="link"
+                  onClick={() => router.push('/register')}
+                  className="text-pink-300 hover:text-[#413d79] p-0 h-auto font-normal underline"
+                >
+                  Daftar dulu yuk
+                </Button>
+              </div>
             </div>
 
             {/* Right Section - Logo hidden on mobile */}

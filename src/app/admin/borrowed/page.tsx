@@ -1,22 +1,77 @@
-"use client";
+'use client';
 
-import { BorrowedItemsTable } from "@/components/borrowed-item-table"
-import { Input } from "@/components/ui/input"
+import { BorrowedItemsTable } from '@/components/borrowed-item-table';
+import { Input } from '@/components/ui/input';
 import { useState } from 'react';
-import { mockBorrowedItems } from "@/data/mockBorrowedItems"
+import { useLoanRequests } from '@/hooks/useLoanRequests';
+import { Skeleton } from '@/components/ui/skeleton';
+import { LoanStatus, ReturnCondition } from '@prisma/client';
+
+interface LoanRequestWithRelations {
+  id: string;
+  requestNumber: string;
+  name: string;
+  kuantitas: number;
+  status: LoanStatus;
+  isReturned: boolean;
+  returnedCondition: ReturnCondition | null;
+  imageUrl: string;
+  createdAt: string;
+  inventory: {
+    imageUrl: string | null;
+    name: string;
+  };
+  account: {
+    username: string;
+  };
+}
+
+interface LoanRequestData {
+  pending: LoanRequestWithRelations[];
+  borrowed: LoanRequestWithRelations[];
+  returned: LoanRequestWithRelations[];
+}
 
 export default function BorrowedItemsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
-  
-  // Filter items based on search query
-  const filteredItems = mockBorrowedItems.filter(item => 
-    item.trackingId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.product.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.customer.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.date.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    item.status.toLowerCase().includes(searchQuery.toLowerCase())
+
+  const { data, loading, error } = useLoanRequests() as {
+    data: LoanRequestData | null;
+    loading: boolean;
+    error: string | null;
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-8 w-full min-h-screen bg-Background-A p-4 md:p-8">
+        <Skeleton className="h-8 w-64 mx-auto bg-white/10" />
+        <div className="space-y-4">
+          {[...Array(5)].map((_, idx) => (
+            <Skeleton key={idx} className="h-16 w-full bg-white/10" />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
+
+  const allItems: LoanRequestWithRelations[] = [
+    ...(data?.pending || []),
+    ...(data?.borrowed || []),
+    ...(data?.returned || []),
+  ];
+
+  const filteredItems = allItems.filter(
+    (item) =>
+      item.requestNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.inventory.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.account.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.status.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredItems.length / entriesPerPage);
@@ -38,7 +93,7 @@ export default function BorrowedItemsPage() {
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
-    setCurrentPage(1); // Reset to first page when searching
+    setCurrentPage(1);
   };
 
   return (
@@ -49,7 +104,7 @@ export default function BorrowedItemsPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-Text-A text-sm md:text-base">Show</span>
-          <select 
+          <select
             className="bg-white/10 text-Text-A border border-white/20 rounded-md text-sm md:text-base px-2 py-1"
             value={entriesPerPage}
             onChange={handleEntriesChange}
@@ -71,7 +126,7 @@ export default function BorrowedItemsPage() {
         </div>
       </div>
       <div className="overflow-x-auto">
-        <BorrowedItemsTable 
+        <BorrowedItemsTable
           items={paginatedItems}
           currentPage={currentPage}
           totalPages={totalPages}

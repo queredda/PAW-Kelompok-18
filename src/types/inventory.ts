@@ -1,26 +1,28 @@
-interface InventoryItem {
-  id: string
-  name: string
-  kategori: string
-  kondisi: string
-  kuantitas: number
-  imageUrl: string
-  status: 'Available' | 'Borrowed'
+import { InventoryStatus, ItemCondition } from '@prisma/client';
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  kategori: string;
+  totalKuantitas: number;
+  imageUrl?: string | null;
+  status: InventoryStatus;
+  kondisi: ItemCondition;
+  totalItemRusak: number;
+  totalItemBaik: number;
+  totalItemDipinjam: number;
+  createdAt: string;
+  updatedAt: string;
 }
 
-//  interface BorrowedItem {
-//   _id: string,
-//   inventoryId: string,
-//   userId: string,
-//   name: string,
-//   kuantitas: number,
-//   status: "Delivered",
-//   isReturned: boolean,
-//   returnedCondition: "baik",
-//   loanId: 4,
-//   __v: 0, 
-//   namaUser: "Anonymous"
-// }
+interface SeparatedInventoryItem {
+  id: string
+  name: string
+  kondisi: ItemCondition
+  kuantitas: number
+  status: InventoryStatus
+  kategori: string
+}
 
 interface BorrowedItem {
   trackingId: string
@@ -47,13 +49,11 @@ interface BorrowedStats {
 }
 
 interface Stats {
-  totalItems: number;
-  availableItems: number;
-  borrowedItems: number;
-  totalUsers: number;
-  totalRequests: number;
-  pendingRequests: number;
-  completedRequests: number;
+  totalItem: number;
+  totalItemBaik: number;
+  totalItemRusak: number;
+  totalItemDipinjam: number;
+  totalPermintaanPeminjaman: number;
 }
 
 interface NavbarProps {
@@ -61,4 +61,4 @@ interface NavbarProps {
   path: string;
 }
 
-export type { NavbarProps, InventoryItem, BorrowedItem, InventoryStats, BorrowedStats, Stats };
+export type { NavbarProps, BorrowedItem, InventoryStats, BorrowedStats, Stats, SeparatedInventoryItem };
