@@ -1,47 +1,75 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from 'react'
-import { api } from "@/lib/api"
-import { InventoryTable } from "@/components/items-for-loan"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import type { InventoryItem } from "@/types/inventory"
+import React, { useState, useEffect } from 'react';
+import { useSession } from 'next-auth/react';
+import { InventoryTable } from '@/components/items-for-loan';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { Skeleton } from "@/components/ui/skeleton"
+import { Skeleton } from '@/components/ui/skeleton';
+import axios from 'axios';
+import { InventoryStatus, ItemCondition } from '@prisma/client';
+
+interface InventoryItem {
+  id: string;
+  name: string;
+  kategori: string;
+  totalKuantitas: number;
+  imageUrl?: string | null;
+  status: InventoryStatus;
+  kondisi: ItemCondition;
+  totalItemRusak: number;
+  totalItemBaik: number;
+  totalItemDipinjam: number;
+  createdAt: string;
+  updatedAt: string;
+}
 
 export default function InventoryPage() {
+  const { status } = useSession();
   const [items, setItems] = useState<InventoryItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage, setEntriesPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  
+  const [error, setError] = useState('');
+
   useEffect(() => {
     const fetchItems = async () => {
+      if (status !== 'authenticated') return;
+
       setLoading(true);
       try {
-        const response = await api.get('api/user/inventory');
-        setItems(response.data);
-        console.log('Response:', response.data);
+        const response = await axios.get('/api/user/inventory', {
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (response.data) {
+          setItems(response.data);
+          console.log('Inventory items:', response.data);
+        }
       } catch (err) {
-        setError("Failed to fetch inventory data.");
-        console.error(err);
+        console.error('Fetch error:', err);
+        setError('Failed to fetch inventory data.');
       } finally {
         setLoading(false);
       }
     };
 
     fetchItems();
-  }, []);
+  }, [status]);
 
   const filteredItems = items.filter((item) => {
     const searchLower = searchTerm.toLowerCase();
     return (
-      item.name.toLowerCase().includes(searchLower) ||
-      item.kategori.toLowerCase().includes(searchLower) ||
-      item.kondisi.toLowerCase().includes(searchLower) ||
-      item.status.toLowerCase().includes(searchLower)
+      item.totalItemBaik > 0 &&
+      item.status === 'Available' &&
+      (item.name.toLowerCase().includes(searchLower) ||
+        item.kategori.toLowerCase().includes(searchLower) ||
+        item.kondisi.toLowerCase().includes(searchLower) ||
+        item.status.toLowerCase().includes(searchLower))
     );
   });
 
@@ -97,7 +125,7 @@ export default function InventoryPage() {
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-0">
         <div className="flex flex-wrap items-center gap-2">
           <span className="text-Text-A text-sm md:text-base">Show</span>
-          <select 
+          <select
             className="bg-white/10 text-Text-A border border-white/20 rounded-md text-sm md:text-base px-2 py-1"
             value={entriesPerPage}
             onChange={handleEntriesChange}
@@ -120,19 +148,19 @@ export default function InventoryPage() {
       </div>
       <div className="overflow-x-auto">
         <InventoryTable items={paginatedItems} />
-        {(error || items.length === 0) && (
+        {(error || filteredItems.length === 0) && (
           <div className="h-screen flex items-center justify-center">
             <p className="text-Text-A text-xl">No Items Available</p>
           </div>
         )}
       </div>
       <div className="flex justify-center gap-2 flex-wrap">
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="text-Text-A hover:bg-Secondary-A hover:text-Text-A"
           onClick={() => handlePageChange(currentPage - 1)}
           disabled={currentPage === 1}
-        > 
+        >
           <ChevronLeft />
         </Button>
         {[...Array(totalPages)].map((_, index) => (
@@ -140,15 +168,17 @@ export default function InventoryPage() {
             key={index + 1}
             variant="default"
             className={`text-sm md:text-base ${
-              currentPage === index + 1 ? 'bg-Secondary-A text-Text-A hover:bg-Secondary-A/80' : 'text-Text-A'
+              currentPage === index + 1
+                ? 'bg-Secondary-A text-Text-A hover:bg-Secondary-A/80'
+                : 'text-Text-A'
             } text-Text-A`}
             onClick={() => handlePageChange(index + 1)}
           >
             {index + 1}
           </Button>
         ))}
-        <Button 
-          variant="ghost" 
+        <Button
+          variant="ghost"
           className="text-Text-A hover:bg-Secondary-A hover:text-Text-A"
           onClick={() => handlePageChange(currentPage + 1)}
           disabled={currentPage === totalPages}
