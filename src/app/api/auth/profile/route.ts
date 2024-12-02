@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
-import connectDB from '@/lib/db';
-import { getModels } from '@/lib/models';
+import prisma from '@/lib/prisma';
 import { SaveOneFileToDrive } from '@/lib/google-drive';
 
 export async function GET(req: NextRequest) {
@@ -11,26 +10,22 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ message: 'Unauthorized' }, { status: 401 });
     }
 
-    await connectDB();
-    const { UserModel } = getModels();
+    const user = await prisma.account.findUnique({
+      where: { id: token.sub },
+    });
 
-    const user = await UserModel.findById(token.sub);
     if (!user) {
-      return NextResponse.json(
-        { message: 'User not found' },
-        { status: 404 }
-      );
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
-    
-    // Remove sensitive data and ensure all required fields are present
+
     const userProfile = {
-      id: user._id.toString(),
-      name: user.name || 'Anonymous',
+      id: user.id,
+      name: user.username || 'Anonymous',
       email: user.email,
       role: user.role,
-      profilePic: user.profilePic || null
+      profilePic: user.profilePic || null,
     };
-    
+
     return NextResponse.json(userProfile);
   } catch (error) {
     console.error('Profile fetch error:', error);
@@ -53,32 +48,22 @@ export async function PATCH(req: NextRequest) {
     const email = formData.get('email') as string;
     const file = formData.get('file') as File | null;
 
-    await connectDB();
-    const { UserModel } = getModels();
+    // Check if user exists using Prisma
+    const existingUser = await prisma.account.findUnique({
+      where: { id: token.sub },
+    });
 
-    const user = await UserModel.findById(token.sub);
-    if (!user) {
-      return NextResponse.json(
-        { message: 'User not found' },
-        { status: 404 }
-      );
+    if (!existingUser) {
+      return NextResponse.json({ message: 'User not found' }, { status: 404 });
     }
 
-    // Update basic info
-    if (name) user.name = name;
-    if (email) user.email = email;
-
     // Handle profile picture upload
+    let profilePic = undefined;
     if (file && file instanceof File) {
       try {
-        const imageUrl = await SaveOneFileToDrive(
-          file,
-          `profile-${user._id}-${Date.now()}`,
-          file.type
-        );
-        user.profilePic = imageUrl;
-      } catch (uploadError) {
-        console.error('Profile picture upload error:', uploadError);
+        profilePic = await SaveOneFileToDrive(file, file.name);
+      } catch (error) {
+        console.error('File upload error:', error);
         return NextResponse.json(
           { message: 'Failed to upload profile picture' },
           { status: 500 }
@@ -86,14 +71,22 @@ export async function PATCH(req: NextRequest) {
       }
     }
 
-    await user.save();
+    // Update user with Prisma
+    const updatedUser = await prisma.account.update({
+      where: { id: token.sub },
+      data: {
+        username: name || existingUser.username,
+        email: email || existingUser.email,
+        profilePic: profilePic || existingUser.profilePic,
+      },
+    });
 
     return NextResponse.json({
-      id: user._id.toString(),
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      profilePic: user.profilePic
+      id: updatedUser.id,
+      name: updatedUser.username,
+      email: updatedUser.email,
+      role: updatedUser.role,
+      profilePic: updatedUser.profilePic,
     });
   } catch (error) {
     console.error('Profile update error:', error);
@@ -108,4 +101,4 @@ export const config = {
   api: {
     bodyParser: false,
   },
-}; 
+};

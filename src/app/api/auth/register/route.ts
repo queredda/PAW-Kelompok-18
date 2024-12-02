@@ -1,64 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { AuthController } from '@/controllers/auth';
-import connectDB from '@/lib/db';
+import bcrypt from 'bcryptjs';
+import prisma from '@/lib/prisma';
+import { Role } from '@prisma/client';
 
 export async function POST(req: NextRequest) {
   try {
-    console.log('Starting registration process');
-    await connectDB();
-    console.log('Database connected');
-    
-    const body = await req.json();
-    console.log('Request body:', body);
-    
-    // Validate role
-    if (body.role && !['admin', 'user'].includes(body.role)) {
-      console.log('Invalid role specified:', body.role);
+    const { name, email, password: passwordInput, role } = await req.json();
+
+    if (!name || !email || !passwordInput) {
       return NextResponse.json(
-        { message: 'Invalid role specified' },
+        { message: 'Missing required fields' },
         { status: 400 }
       );
     }
-    
-    console.log('Registering user with data:', body);
-    const user = await AuthController.register(body);
-    console.log('User registered successfully:', {
-      id: user._id,
-      email: user.email,
-      name: user.name,
-      role: user.role
+
+    // Check if user already exists
+    const existingUser = await prisma.account.findFirst({
+      where: {
+        OR: [{ email }, { username: name }],
+      },
     });
-    
-    return NextResponse.json({ 
-      message: 'Registration successful',
-      user: {
-        id: user._id,
-        email: user.email,
-        name: user.name,
-        role: user.role
-      }
+
+    if (existingUser) {
+      return NextResponse.json(
+        { message: 'User already exists with this email or username' },
+        { status: 400 }
+      );
+    }
+
+    // Hash password
+    const hashedPassword = await bcrypt.hash(passwordInput, 10);
+
+    // Create user
+    const user = await prisma.account.create({
+      data: {
+        username: name,
+        email,
+        password: hashedPassword,
+        role: role.toUpperCase() as Role,
+      },
     });
+
+    // Remove password from response
+    const { ...userWithoutPassword } = user;
+
+    return NextResponse.json(userWithoutPassword);
   } catch (error) {
     console.error('Registration error:', error);
-    // Log the full error details
-    if (error instanceof Error) {
-      console.error('Error details:', {
-        message: error.message,
-        stack: error.stack,
-        name: error.name
-      });
-    }
-    
     return NextResponse.json(
-      { 
-        message: error instanceof Error ? error.message : 'Registration failed',
-        details: process.env.NODE_ENV === 'development' ? error : undefined
-      },
-      { 
-        status: error instanceof Error && error.message.includes('exists') 
-          ? 409 
-          : 500 
-      }
+      { message: 'Failed to register user' },
+      { status: 500 }
     );
   }
 }
