@@ -1,11 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '@/lib/db';
-import { getModels } from '@/lib/models';
+import prisma from '@/lib/prisma';
 
 export async function GET(req: NextRequest) {
   try {
-    await connectDB();
-    const { InventoryModel } = getModels();
     const name = req.nextUrl.searchParams.get('name');
 
     if (!name) {
@@ -15,10 +12,15 @@ export async function GET(req: NextRequest) {
       );
     }
 
-    const item = await InventoryModel.findOne({ name });
+    const item = await prisma.inventory.findFirst({
+      where: { name }
+    });
 
     if (!item) {
-      return NextResponse.json({ message: 'Item not found' }, { status: 404 });
+      return NextResponse.json(
+        { message: 'Item not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({
@@ -28,8 +30,8 @@ export async function GET(req: NextRequest) {
         name: item.name,
         kategori: item.kategori,
         imageUrl: item.imageUrl,
-        status: item.status || 'Available',
-        kondisi: item.kondisi || 'baik',
+        status: item.status,
+        kondisi: item.kondisi,
         totalKuantitas: item.totalKuantitas,
       },
     });
