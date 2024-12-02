@@ -1,9 +1,11 @@
-export type RequestStatus = 'Proses' | 'Delivered' | 'Canceled' | 'Borrowed' | 'Returned';
-export type ReturnCondition = 'baik' | 'rusak';
+import { LoanStatus, ReturnCondition } from '@prisma/client';
+
+export type RequestStatus = LoanStatus;
+export { ReturnCondition };
 
 export interface LoanRequest {
-  status: RequestStatus;
+  status: LoanStatus;
   returnedCondition?: ReturnCondition;
   kuantitas: number;
-  inventoryId: number;
-} 
+  inventoryId: string;
+}
